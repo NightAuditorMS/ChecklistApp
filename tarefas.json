@@ -1,0 +1,842 @@
+{
+  "noite": [
+    {
+      "id": "fase1",
+      "title": "FASE 1 — Início do turno",
+      "note": "Objetivo: receber o turno, recolher contexto, identificar pendências e preparar a base do fecho.",
+      "sections": [
+        {
+          "title": "Passagem de turno e preparação",
+          "items": [
+            {
+              "text": "Passagem de turno.",
+              "help": "Verificar pedidos especiais: Wake-up calls, Breakfast Boxes, Transfers, atualizações do Daily Report, etc. Verificar atualizações junto às equipas do Blackmoon e Butlers.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar as chegadas e partidas do dia.",
+              "help": "Conferir chegadas & check-outs pendentes.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar reservas em modo Opção.",
+              "help": "Verificar o porquê não estão confirmadas ou canceladas.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Enviar relatório para o SEF após a meia-noite; caso haja novas chegadas após o envio, reenviar.",
+              "help": "Garantir conformidade legal com o envio das informações obrigatórias.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar No-Shows, atualizar status da reserva no HOST PMS e enviar e-mail com os detalhes para GM, FOM e Reservas.",
+              "help": "Esperar até por volta de 2:00 para confirmar o No-Show.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Contar a caixa, atualizar ficheiro Excel e enviar um print do ecrã ao FOM.",
+              "help": "Verificar se paid-outs, vales estão assinados e justificados.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Efetuar ronda pelas áreas públicas do hotel: Lobby, Lounge, Restrooms, etc.",
+              "help": "Verificar se está tudo de acordo com o padrão e ajeitar/reportar ao FOM o que estiver discrepante.",
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Relatórios Front Office pré-fecho",
+          "items": [
+            {
+              "text": "Previsão de lançamentos Night Audit SANA: confirmar tarifas dos quartos in-house.",
+              "help": "Caso seja identificada alguma reserva com valor discrepante, comunicar o setor de reservas e FOM.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Adjustments by Cashier Name: verificar e, caso haja ajustes e/ou cancelamentos, imprimir e adicionar à documentação do fecho do dia.",
+              "help": "Verificar alterações e cancelamentos de itens lançados nas contas dos hóspedes.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar Relatório 90. Diário de Caixa com City Ledger SANA e confirmar o dinheiro recebido no dia em PMS/POS.",
+              "help": "Pré verificação das entradas e saídas financeiras registadas em PMS e POS.",
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase2",
+      "title": "FASE 2 — Pré-fecho financeiro e Blackmoon/Butlers",
+      "note": "Objetivo: validar documentos, contas, recebimentos e itens dependentes de outros pontos operacionais.",
+      "sections": [
+        {
+          "title": "Pré-fecho financeiro",
+          "items": [
+            {
+              "text": "Verificar faturas Diretos/OTAs e notas de crédito do dia, confirmar se foram impressas e salvas nas pastas corretas.",
+              "help": "Caminho: \"C:\\Users\\recep1.dtsuites\\OneDrive - SANA MYTHIC CHATOYANT LDA\\Recepção\\Reservas\"",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar pagamentos recebidos via Rede Unicre.",
+              "help": "Lançar na conta de referência e inserir observações. Baixar o arquivo Excel com os dados das transações na página da Rede Unicre.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar se todas as contas dos quartos que fizeram check-out estão fechadas.",
+              "help": "Caso haja alguma em aberto, fechar ou verificar/justificar a pendência.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Recolher o dinheiro recebido em PMS.",
+              "help": "Dinheiro proveniente de check-outs, depósitos de hóspedes, etc.",
+              "optional": true,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Blackmoon e Butlers",
+          "items": [
+            {
+              "text": "Recolher o dinheiro recebido em POS.",
+              "help": "Valor entregue pelo responsável pelo fecho do Blackmoon e mordomo de serviço.",
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Recolher a chave da caixa do Blackmoon e solicitar assinatura na folha de controlo.",
+              "help": "Folha está junto ao dossiê dos hóspedes, a chave deve estar guardada junto.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Acessar Relatório 10. Vendas por Documentos; Relatório 31. Cancelamentos de Artigo; Relatório 32. Consumos Internos.",
+              "help": "Salvar estes relatórios na pasta de Consumos Internos e Cancelamentos, na pasta do fecho do dia.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Talões de Consumos Internos assinados e justificados.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Talões de Cancelamentos agrafados e justificados.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Talões organizados por método de pagamento.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Talões de Room-Service assinados pelos hóspedes.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Fechos dos POSs Blackmoon.",
+              "help": "Fechos do POS 1 e POS 2.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Fechos dos TPAs Blackmoon.",
+              "help": "Finais: 697 (Receção), 698, 699 e 700.",
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase3",
+      "title": "FASE 3 — Auditoria Noturna",
+      "note": "Confirmar que temos todo o pré fecho concluído para seguir com a auditoria.",
+      "sections": [
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Preparar envelope do depósito do dia.",
+              "help": "Juntar o dinheiro recebido de todos os departamentos. Escrever data, valor total por departamento, assinar.",
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Preencher o ficheiro de depósito do cofre e solicitar assinatura.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Verificar se todos os POSs estão fechados.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Executar Auditoria Noturna.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Arquivar Paymasters POS.",
+              "help": "Check-out → Funções → Arquivador de Contas Paymasters POS → Selecionar data → Confirmar.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Preencher ficheiro Excel de caixa.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase4",
+      "title": "FASE 4 — Ficheiros para envio no MySana",
+      "note": "Manter os arquivos dos relatórios digitais e imprimir para arquivo do fecho.",
+      "sections": [
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Folha do Fecho de Caixa Excel com as observações, se houver, e assinada.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 90. Diário de Caixa com City Ledger SANA.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 125. Trial Balance Mythic SANA NOVO, com o filtro \"Mostrar impostos no Guest Ledger?\" = sim.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Folha com a cópia dos fechos dos POSs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 91. Lista Transações Interface Pagamento Automático NEW.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Folha com a cópia dos fechos de todos os TPAs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 90. Diário de Caixa com PAID-OUTS E DESEMBOLSOS.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Processos de reembolso efetuados por FO/FOM.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Processos de reembolso e chargeback via Rede Unicre.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Notas de crédito PMS e POS.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Paid-outs de hóspedes.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Outros documentos relevantes para validar o fecho.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase5",
+      "title": "FASE 5 — Pós-auditoria Noturna",
+      "note": "Objetivo: resolver pendências residuais depois do fecho técnico.",
+      "sections": [
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Verificar Relatório 190. Controlo Night Audit.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar Relatório 53. Tarefas por data e secção SANA.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar se há cartões virtuais a serem cobrados.",
+              "help": "Expedia: aguardar até às 5:00. CTrip: verificar se há ficheiro salvo na guia documentos.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar check-outs, retirar documentos e imprimir extratos com saldos devedores.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Verificar check-ins, imprimir boletins, criar chaves, gerar PIN SAN.IA, colocar nas pastas e comunicar o butler.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase6",
+      "title": "FASE 6 — Relatórios para Departamentos e Direção",
+      "note": "Garantir que o sistema Clever esteja com a \"Hotel Date\" na data atual antes de gerar os relatórios.",
+      "sections": [
+        {
+          "title": "Relatórios para a Direção — e-mail e WhatsApp",
+          "items": [
+            {
+              "text": "Relatório Clever - EVOL 3/6 meses.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 03. Residentes Resumido, data corrente.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 150. Managers Report Epic Mythic SANA, dia anterior.",
+              "help": "Editar o nome do ficheiro e apagar o nome \"Epic\" antes do envio.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 13. Yearview Mythic SANA, data corrente.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 13. Markhist Mythic SANA, data corrente.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, dia anterior.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 130. Previsão de ocupação — período de 30 dias.",
+              "help": "Filtrar por \"Mensal\".",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 13. History and Forecast by Market Code DEF, data corrente a 6 meses.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Relatórios da Auditoria Noturna — Envio por e-mail",
+          "items": [
+            {
+              "text": "Daily report novo dia.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 151. Manager Report SANA com orçamento.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 02. Chegadas completo individuais, filtrar por datas do dia atual + 7 dias.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 03. Residentes Resumido, data corrente.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 09. Mapa de Refeições, filtro detalhes = sim.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 160. Manutenção.",
+              "help": "Filtrar por FDS apenas.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Vip Alerts.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
+            {
+              "text": "Report CRM atual em PDF.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "A imprimir",
+          "items": [
+            {
+              "text": "Relatório 09. Mapa de Refeições — 2 cópias para Cozinha e Blackmoon.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 03. Residentes Resumido — 5 cópias: 2 p/ Butler, 1 p/ Cozinha, 1 p/ Blackmoon, 1 p/ Dtra.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 02. Chegadas completo individuais — 5 cópias: 2 p/ Butler, 1 p/ Cozinha, 1 p/ Blackmoon, 1 p/ Dtra.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Daily report novo dia — 6 cópias: 2 p/ Butler, 1 p/ Cozinha, 1 p/ Blackmoon, 1 p/ Dtra e 1 p/ Receção.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
+              "help": null,
+              "optional": true,
+              "sunday": true
+            }
+          ]
+        },
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Relatório 09. Mapa de Refeições Geral, data fecho de Domingo.",
+              "help": null,
+              "optional": true,
+              "sunday": true
+            },
+            {
+              "text": "Relatório 42. Vendas por Tipo de Cliente, data fecho de Domingo.",
+              "help": null,
+              "optional": true,
+              "sunday": true
+            },
+            {
+              "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
+              "help": null,
+              "optional": true,
+              "sunday": true
+            },
+            {
+              "text": "Estado Hotel: taxa de ocupação, quartos e hóspedes — print screen.",
+              "help": null,
+              "optional": true,
+              "sunday": true
+            }
+          ]
+        },
+        {
+          "title": null,
+          "items": [
+            {
+              "text": "Gerar relatório EVOL 12 meses, marcar \"Mostrar todos os dados\" → enviar para e-mail do auditor via Clever → download em Excel → fixar painéis → salvar como .xls → responder a todos no e-mail recebido e anexar ficheiro.",
+              "help": "Instruções para enviar o relatório de maneira correta.",
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "manha": [
+    {
+      "id": "manha-continua",
+      "title": null,
+      "sections": [
+        {
+          "title": "Preparação e Auditoria Inicial",
+          "items": [
+            {
+              "text": "<strong>Leitura de Registos</strong>: Consultar Livro de Turno e Outlook.",
+              "help": "Validar pendentes e eventos do dia.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Contagem de Caixa</strong>: Enviar foto via WhatsApp ao FOM.",
+              "help": "Verificar Cash (relatório 90) e vales.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Briefing (ODS &amp; VIPs)</strong>: Analisar Ordens de Serviço.",
+              "help": "Personalizar acolhimento conforme Daily Report.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Login e Acessos</strong>: HOST, E-mail, WhatsApp, Vostio.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Auditoria de Imagem</strong>: Lobby e Balcão (música, fragrância, toldo).",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Controlo de Inventário</strong>: Material e POS carregado.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Operação e Coordenação",
+          "items": [
+            {
+              "text": "<strong>Coordenação Butler</strong>: Gerir Early Check-ins e Late Check-outs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Gestão de Check-outs</strong>: Conferência de contas e faturas.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Gestão de Check-ins</strong>: Atribuição de quartos e horários.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Preparação de Kits</strong>: Key Cards, RFs e Wi-Fi.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Administrativo e CRM",
+          "items": [
+            {
+              "text": "<strong>Atualização de Perfis</strong>: ProfileNow / Prelude no HOST.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Email Prelude</strong>: Responder questionários.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>CRM</strong>: Reservas até 7 dias.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Atendimento e Correspondência</strong>: Telefone, WhatsApp e E-mails.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Fecho e Passagem",
+          "items": [
+            {
+              "text": "<strong>Organização Documental</strong>: Salvar faturas em PDF e arquivar RFs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Passagem de Turno</strong>: Contagem final e registo no Livro.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tarde": [
+    {
+      "id": "tarde-continua",
+      "title": null,
+      "sections": [
+        {
+          "title": "Início de Turno e Briefing",
+          "items": [
+            {
+              "text": "<strong>Leitura e Caixa</strong>: Livro de Turno e Contagem de Caixa.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Briefing e Login</strong>: ODS/VIPs e acesso às plataformas.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Operação e Auditoria de Imagem",
+          "items": [
+            {
+              "text": "<strong>Butler e Check-outs</strong>: Gestão de Late Check-outs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Amenities e Chegadas</strong>: Ficheiro \"Amenities Diários\" e Relatório 02.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Auditoria de Imagem</strong>: Lobby (fragrância, playlist e fechar toldo).",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Back-Office e CRM",
+          "items": [
+            {
+              "text": "<strong>Perfis e Prelude</strong>: Atualização no HOST e respostas aos emails.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>CRM e Transferes</strong>: Ficheiro CRM e validação de transferes (Outlook/Excel).",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Contas a Zero</strong>: Fechar contas pendentes de Check-outs.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Preparação e Fecho",
+          "items": [
+            {
+              "text": "<strong>Dia Seguinte</strong>: Revisão individual de reservas e faturas.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Fecho e Passagem</strong>: PDF de faturas e contagem final de caixa.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "doorman": [
+    {
+      "id": "doorman-continua",
+      "title": null,
+      "sections": [
+        {
+          "title": "Rondas e Imagem",
+          "items": [
+            {
+              "text": "<strong>Pisos e Acessos</strong>: Inspeção e destracar portas (Áurea/VIP).",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Imagem Exterior e WCs</strong>: Limpeza de entradas e sanitários públicos.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Apoio Operacional e Bagagens",
+          "items": [
+            {
+              "text": "<strong>Briefing e Inventário</strong>: Alinhamento com Receção e material de apoio.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Bagagens e Parking</strong>: Organização de malas no BO e carros.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Trolley e Check-ins</strong>: Preparação e apoio ao rooming.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Concierge e Segurança",
+          "items": [
+            {
+              "text": "<strong>Recomendações</strong>: Apoio de concierge básico a hóspedes.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Ronda Final e Portas</strong>: Trancar VIP e vistoria aos corredores.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
+          "title": "Fecho e Passagem",
+          "items": [
+            {
+              "text": "<strong>Comunicação</strong>: Passagem de ocorrências à Receção.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "<strong>Encerramento</strong>: Trancar porta principal e organizar material.",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

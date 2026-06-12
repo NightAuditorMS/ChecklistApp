@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist Operacional Multiturno v1.0</title>
+  <link rel="manifest" href="./manifest.json">
+</head>
+<body>
+  <a href="#mainContent" class="skip-link">Saltar para o conteúdo</a>
+  <header>
+    <div class="brand">
+      <img src="./MythicSanaHotelLogoCor.png" alt="Logo Mythic SANA" />
+      <h1>Checklist Operacional Multiturno v1.0</h1>
+    </div>
+    <div id="auditorInfo">Auditor não identificado</div>
+  </header>
+
+  <main id="mainContent" class="container">
+
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-checklist">Checklists</button>
+      <button class="tab-btn" data-tab="tab-contagem">Contagem de Caixa</button>
+    </nav>
+
+    <!-- ABA 1: CHECKLIST -->
+    <div id="tab-checklist" class="tab-content active">
+
+    <div class="card checklist-map">
+      <h3>Checklist disponíveis</h3>
+      <p>Night Audit, Manhã, Tarde e Doorman.</p>
+    </div>
+
+    <!-- TELA 1 -->
+    <div id="tela1" class="card">
+      <div class="path-box" style="margin-bottom:14px">
+        <strong>Passo 1</strong><br>
+        Seleciona o turno, identifica o rececionista e regista a data antes de abrir a checklist.
+      </div>
+      <h2>Nova abertura de turno</h2>
+      <p class="section-note">Escolhe o turno que vais trabalhar e inicia o processo do zero.</p>
+      <div class="meta-grid">
+        <div>
+          <label for="turnoSelecionado"><strong>Turno</strong></label>
+          <select id="turnoSelecionado">
+            <option value="">Selecionar...</option>
+            <option value="noite">Noite</option>
+            <option value="manha">Manhã</option>
+            <option value="tarde">Tarde</option>
+            <option value="doorman">Doorman</option>
+          </select>
+        </div>
+        <div>
+          <label for="auditorNome"><strong>Nome do rececionista</strong></label>
+          <input id="auditorNome" type="text" placeholder="Ex.: João Silva">
+        </div>
+        <div>
+          <label for="auditorData"><strong>Data de trabalho</strong></label>
+          <input id="auditorData" type="date">
+        </div>
+        <div>
+          <label for="obsIniciais"><strong>Observações iniciais do turno</strong></label>
+          <textarea id="obsIniciais" rows="3" placeholder="Ex.: pendência de receção, informação do Blackmoon, anomalia de sistema..."></textarea>
+        </div>
+      </div>
+      <div class="section-tools">
+        <span class="bulk-toggle">Antes de iniciar, confirma os dados do turno</span>
+      </div>
+      <p class="footer-note">O turno escolhido define a checklist que será aberta a seguir.</p>
+      <button class="phase-btn" id="confirmarTurnoBtn" type="button">Iniciar turno</button>
+    </div>
+
+    <!-- TELA 2 -->
+    <div id="tela2" style="display:none;">
+      <div class="card">
+
+        <!-- Exclusivos Night Audit -->
+        <div class="bloco-exclusivo-noturno">
+          <h2>Caminhos fixos</h2>
+          <p><strong>Fechos diários</strong></p>
+          <div class="path-box">\OneDrive - SANA MYTHIC CHATOYANT LDA\Night Auditor\FECHOS DO DIA 2026</div>
+          <p><strong>Templates diários</strong></p>
+          <div class="path-box">\OneDrive - SANA MYTHIC CHATOYANT LDA\Night Auditor\FECHOS DO DIA 2026\Templates diários</div>
+          <h3>TODOS OS RELATÓRIOS SALVOS NAS PASTAS DO FECHO DO DIA DEVEM SER EMITIDOS APÓS A AUDITORIA NOTURNA.</h3>
+        </div>
+
+        <div class="card">
+          <h3>Legenda visual</h3>
+          <div class="path-box" id="turnoResumoBox" style="margin-bottom:12px;">
+            <strong>Turno Ativo:</strong> <span id="turnoResumoTexto"></span>
+          </div>
+          <div class="legend">
+            <span><span class="legend-mark"></span> Item opcional / condicional</span>
+            <span>Botão <strong>?</strong> = explicação pedagógica</span>
+          </div>
+
+          <!-- ====== NIGHT AUDIT ====== -->
+          <div id="checklist-noite" class="checklist-wrapper" style="display:none;">
+          <!-- Content loaded dynamically from tarefas.json -->
+          </div>
+          <!-- fim checklist-noite -->
+
+          <!-- ====== MANHÃ — lista contínua ====== -->
+          <div id="checklist-manha" class="checklist-wrapper" style="display:none;">
+          <!-- Content loaded dynamically from tarefas.json -->
+          </div>
+          <!-- fim checklist-manha -->
+
+          <!-- ====== TARDE — lista contínua ====== -->
+          <div id="checklist-tarde" class="checklist-wrapper" style="display:none;">
+          <!-- Content loaded dynamically from tarefas.json -->
+          </div>
+          <!-- fim checklist-tarde -->
+
+          <!-- ====== DOORMAN — lista contínua ====== -->
+          <div id="checklist-doorman" class="checklist-wrapper" style="display:none;">
+          <!-- Content loaded dynamically from tarefas.json -->
+          </div>
+          <!-- fim checklist-doorman -->
+
+        </div><!-- fim card interna -->
+
+        <div class="actions">
+          <button class="secondary-btn" id="resetTurnoBtn" type="button">Anular e recomeçar</button>
+        </div>
+
+        <div class="card" id="observacoesFinaisContainer">
+          <h3>Conclusão do turno</h3>
+          <label for="obsFinais"><strong>Observações finais / justificações</strong></label>
+          <textarea id="obsFinais" rows="4" placeholder="Ex.: itens pendentes justificados, discrepâncias, informação não recebida de outro departamento..."></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="final-btn" id="finalizarTurnoBtn" type="button">Finalizar turno</button>
+        </div>
+        <p class="footer-note">O comprovativo em PDF incluirá auditor, data, protocolo MySana, observações e itens concluídos.</p>
+      </div><!-- fim card principal tela2 -->
+    </div><!-- fim tela2 -->
+
+    </div> <!-- Fim tab-checklist -->
+
+    <!-- ABA 2: CONTAGEM DE CAIXA -->
+    <div id="tab-contagem" class="tab-content">
+      <div class="card">
+        <h2>Contagem de Caixa</h2>
+        
+        <!-- Identificação de Turnos para o Caixa -->
+        <div class="card" style="background: rgba(255,255,255,0.02); margin-bottom: 25px;">
+          <div class="meta-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div>
+              <label><strong>Turno Atual</strong></label>
+              <select id="cashTurnoAtual">
+                <option value="">Selecionar...</option>
+                <option value="noite">Noite</option>
+                <option value="manha">Manhã</option>
+                <option value="tarde">Tarde</option>
+                <option value="doorman">Doorman</option>
+              </select>
+            </div>
+            <div>
+              <label><strong>Rececionista Atual</strong></label>
+              <input id="cashRececionistaAtual" type="text" placeholder="Nome...">
+            </div>
+            <div>
+              <label><strong>Próximo Turno</strong></label>
+              <select id="cashTurnoProximo">
+                <option value="">Selecionar...</option>
+                <option value="noite">Noite</option>
+                <option value="manha">Manhã</option>
+                <option value="tarde">Tarde</option>
+                <option value="doorman">Doorman</option>
+              </select>
+            </div>
+            <div>
+              <label><strong>Próximo Rececionista</strong></label>
+              <input id="cashRececionistaProximo" type="text" placeholder="Nome...">
+            </div>
+          </div>
+        </div>
+
+        <p class="section-note">Insira as quantidades de moedas e notas, vaucheres e paid-outs do turno.</p>
+        
+        <div class="cash-grid">
+          <div>
+            <h3>Notas (€)</h3>
+            <table class="cash-table" id="tableNotas">
+              <thead><tr><th>Nota</th><th>Qtd</th><th>Total</th></tr></thead>
+              <tbody>
+                <tr><td>500€</td><td><input type="number" data-value="500" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>200€</td><td><input type="number" data-value="200" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>100€</td><td><input type="number" data-value="100" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>50€</td><td><input type="number" data-value="50" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>20€</td><td><input type="number" data-value="20" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>10€</td><td><input type="number" data-value="10" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>5€</td><td><input type="number" data-value="5" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="2" style="text-align:right"><strong>Subtotal Notas:</strong></td><td id="totalNotasSum" class="row-total">0.00€</td></tr></tfoot>
+            </table>
+          </div>
+          <div>
+            <h3>Moedas (€)</h3>
+            <table class="cash-table" id="tableMoedas">
+              <thead><tr><th>Moeda</th><th>Qtd</th><th>Total</th></tr></thead>
+              <tbody>
+                <tr><td>2€</td><td><input type="number" data-value="2" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>1€</td><td><input type="number" data-value="1" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.50€</td><td><input type="number" data-value="0.5" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.20€</td><td><input type="number" data-value="0.2" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.10€</td><td><input type="number" data-value="0.1" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.05€</td><td><input type="number" data-value="0.05" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.02€</td><td><input type="number" data-value="0.02" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+                <tr><td>0.01€</td><td><input type="number" data-value="0.01" class="cash-input" min="0" value="0"></td><td class="row-total">0.00€</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="2" style="text-align:right"><strong>Subtotal Moedas:</strong></td><td id="totalMoedasSum" class="row-total">0.00€</td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Vales (Vouchers)</h3>
+          <table class="dynamic-table" id="tableVales" style="font-size: 0.9em;">
+            <thead><tr><th>Valor (€)</th><th>Justificação</th><th>Departamento</th><th>Responsável</th><th>Data</th><th>Ações</th></tr></thead>
+            <tbody id="bodyVales"></tbody>
+            <tfoot><tr><td style="text-align:right"><strong>Total Vales:</strong></td><td colspan="2" id="totalValesSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
+          </table>
+          <button class="secondary-btn" style="width:auto; margin-top:10px;" onclick="addRow('bodyVales')">+ Adicionar Vale</button>
+        </div>
+
+        <div class="card">
+          <h3>Paid-outs</h3>
+          <table class="dynamic-table" id="tablePaidouts" style="font-size: 0.9em;">
+            <thead><tr><th>Valor (€)</th><th>Justificação</th><th>Quarto</th><th>Responsável</th><th>Data</th><th>Ações</th></tr></thead>
+            <tbody id="bodyPaidouts"></tbody>
+            <tfoot><tr><td style="text-align:right"><strong>Total Paid-outs:</strong></td><td colspan="2" id="totalPaidoutsSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
+          </table>
+          <button class="secondary-btn" style="width:auto; margin-top:10px;" onclick="addRow('bodyPaidouts')">+ Adicionar Paid-out</button>
+        </div>
+
+        <div class="card" style="margin-top: 10px; text-align: right; border-top: 1px solid var(--border); padding-top: 15px;">
+          <p><strong>Total Documentos (Vales + Paid-outs):</strong> <span id="totalDocsSum" style="color: var(--gold); font-weight: bold;">0.00€</span></p>
+        </div>
+
+        <div class="card" style="margin-top:20px; border-left: 4px solid var(--gold); background: rgba(198,166,103,0.03);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: center;">
+            <div>
+              <p style="margin:0;">Fundo de Caixa Fixo: <strong>750.00€</strong></p>
+              <label for="montanteRecebidoDia" style="font-size: 0.9em; display: block; margin-top: 8px;">Montante recebido dia (Sistema):</label>
+              <input id="montanteRecebidoDia" type="number" step="0.01" value="0" class="cash-input" style="width: 100%; text-align: right; margin-top:4px;">
+            </div>
+            <div style="text-align: right; border-left: 1px solid var(--border); padding-left: 20px;">
+              <p style="font-size: 0.9em; margin-bottom: 5px;">Total Geral (Espécie + Docs): <span id="totalGeralCaixa">0.00</span>€</p>
+              <p style="font-size: 1.1em; margin-bottom: 5px;"><strong>Depósito do Dia:</strong> <span id="depositoDiaCalculado" style="color: var(--gold);">0.00</span>€</p>
+              <p style="font-size: 1.1em; margin:0;"><strong>Diferença:</strong> <span id="diferencaCaixa">0.00</span></p>
+              <div id="statusCaixaMsg" style="font-weight: bold; margin-top: 5px; font-size: 0.95em;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="total-row" style="display:none;">
+          SALDO FINAL: <span id="totalCaixaCalculado">0.00</span> €
+        </div>
+        
+        <p class="footer-note" style="margin-top:20px;">Nota: A contagem de caixa será guardada automaticamente com o progresso do turno.</p>
+      </div>
+    </div> <!-- Fim tab-contagem -->
+
+  </main>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Include the stylesheet locally -->
+  <link rel="stylesheet" href="./styles.css">
+
+  <script src="./cashier.js"></script>
+  <script src="./tarefas.js"></script>
+  <script src="./checklist.js"></script>
+  <script src="./storage.js"></script>
+</body>
+</html>
