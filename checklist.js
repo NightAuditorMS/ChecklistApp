@@ -325,9 +325,14 @@ document.addEventListener('input', e => {
 // Dynamic checklist rendering
 async function loadDynamicChecklists() {
   try {
-    const res = await fetch('./tarefas.json');
-    if (!res.ok) throw new Error('Failed to load tarefas.json');
-    const data = await res.json();
+    // Use data from window.tarefasData (loaded by tarefas.js)
+    // Fall back to fetch if window.tarefasData is not available
+    let data = window.tarefasData;
+    if (!data) {
+      const res = await fetch('./tarefas.json');
+      if (!res.ok) throw new Error('Failed to load tarefas.json');
+      data = await res.json();
+    }
     
     for (const [turno, phases] of Object.entries(data)) {
       const container = document.getElementById(`checklist-${turno}`);
@@ -355,6 +360,14 @@ async function loadDynamicChecklists() {
           }
           html += `<ul>`;
           sec.items.forEach(item => {
+            // Handle download links
+            if (item.type === 'download') {
+              html += `<li class="download-links">`;
+              html += `<a href="${item.url}" download target="_blank" rel="noopener noreferrer">${item.text}</a>`;
+              html += `</li>`;
+              return;
+            }
+            
             const optClass = (item.optional || item.sunday) ? ' optional-item' : '';
             html += `<li class="check-item${optClass}">`;
             
