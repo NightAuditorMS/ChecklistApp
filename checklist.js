@@ -28,7 +28,7 @@ function clearWarnings() { getChecklistItems().forEach(li => li.classList.remove
 
 function aplicarExclusivos(turno) {
   $$('.bloco-exclusivo-noturno').forEach(el => {
-    el.style.display = turno === 'noite' ? '' : 'none';
+    el.style.display = turno === 'noite' ? 'block' : 'none';
   });
 }
 
