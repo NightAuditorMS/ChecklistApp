@@ -390,6 +390,15 @@ async function loadDynamicChecklists() {
           html += `</ul>`;
         });
         
+        if (phase.id === 'fase4') {
+          html += `
+            <div style="margin-top: 20px; padding: 15px; border: 1px solid var(--gold); border-radius: 8px; background: rgba(198,166,103,0.05);">
+              <label for="proto" style="display: block; margin-bottom: 8px;"><strong>Protocolo MySana</strong></label>
+              <input id="proto" type="text" placeholder="Ex.: MYS-2024-001" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: rgba(255,255,255,0.05); color: white;">
+            </div>
+          `;
+        }
+
         html += `</div>`;
       });
       
