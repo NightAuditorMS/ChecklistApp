@@ -288,44 +288,50 @@ async function gerarPDF() {
 
   const safe = sanitizeFileName(`Checklist_${map[turno] || turno}_${data}_${auditor}`) || 'ChecklistComprovativo';
   doc.save(`${safe}.pdf`);
-  // 1. Converter o PDF gerado num formato de texto (Base64) para enviar pela internet
-  const pdfBase64 = doc.output('datauristring').split(',')[1];
+  // --- INÍCIO DO BLOCO DETETIVE ---
+  try {
+    const pdfBase64 = doc.output('datauristring').split(',')[1];
 
-  // 2. Recolher os dados do ecrã para enviar ao SharePoint
-  // Nota: Ajuste os IDs abaixo caso os seus campos de observações tenham IDs diferentes
-  const payload = {
-    dataHora: new Date().toLocaleString('pt-PT'),
-    turno: turno,
-    rececionista: auditor,
-    totalGeralCaixa: parseFloat(document.getElementById('totalGeralCaixa').innerText) || 0,
-    diferencaCaixa: parseFloat(document.getElementById('diferencaCaixa').innerText) || 0,
-    obsIniciais: document.querySelector('.dyn-just')?.value || "Sem observações iniciais.",
-    obsFinais: "Fecho concluído via app.", // Pode ligar à textarea final do seu HTML
-    pdfNome: `${safe}.pdf`,
-    pdfConteudoBase64: pdfBase64
-  };
+    // O sinal de interrogação (?) previne que o código quebre se o elemento não existir na tela
+    const payload = {
+      dataHora: new Date().toLocaleString('pt-PT'),
+      turno: turno,
+      rececionista: auditor,
+      totalGeralCaixa: parseFloat(document.getElementById('totalGeralCaixa')?.innerText) || 0,
+      diferencaCaixa: parseFloat(document.getElementById('diferencaCaixa')?.innerText) || 0,
+      obsIniciais: document.querySelector('.dyn-just')?.value || "Sem observações iniciais.",
+      obsFinais: "Fecho concluído via app.",
+      pdfNome: `${safe}.pdf`,
+      pdfConteudoBase64: pdfBase64
+    };
 
-  // 3. Enviar para o robô do Power Automate
-  // IMPORTANTE: Substitua o link abaixo pelo link GIGANTE que copiou do Power Automate!
-  const webhookUrl = "https://defaulte3dc9b5c8d2143428af283327ca360.e3.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a90ca4cb88204727a3bf23354a19cf91/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HE9JTgBLGHRX3RZT7qVsSzpnLojaOKhxMHVNssyz8xw";
+    // Replace this string with the actual URL containing the &sig= parameter
+    const webhookUrl = "https://defaulte3dc9b5c8d2143428af283327ca360.e3.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a90ca4cb88204727a3bf23354a19cf91/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HE9JTgBLGHRX3RZT7qVsSzpnLojaOKhxMHVNssyz8xw";
 
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
     .then(response => {
       if (response.ok) {
-        alert("Turno finalizado! Os dados e o PDF foram guardados no SharePoint com sucesso.");
+        alert("✅ SUCESSO! Turno finalizado e salvo no SharePoint!");
       } else {
-        alert("Aviso: O turno foi finalizado localmente, mas houve um erro ao comunicar com o SharePoint.");
+        alert("⚠️ O SharePoint recusou os dados. Código de erro: " + response.status);
       }
     })
     .catch(error => {
-      console.error("Erro no envio para o SharePoint:", error);
+      // Se houver erro de rede ou CORS, o alerta salta na tela em vez de se esconder no console!
+      alert("❌ ERRO DE CONEXÃO: " + error.message);
     });
+
+  } catch (erroGrave) {
+    // Se o JavaScript quebrar ao tentar ler algum dado, ele avisa-o aqui.
+    alert("❌ ERRO NO CÓDIGO DA PÁGINA: " + erroGrave.message);
+  }
+  // --- FIM DO BLOCO DETETIVE ---
 
 }
 
