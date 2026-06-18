@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sana-checklist-v1';
+const CACHE_NAME = 'sana-checklist-v2';
 const ASSETS = [
   './index.aspx',
   './styles.css',
