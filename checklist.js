@@ -315,17 +315,17 @@ async function gerarPDF() {
       },
       body: JSON.stringify(payload)
     })
-    .then(response => {
-      if (response.ok) {
-        alert("✅ SUCESSO! Turno finalizado e salvo no SharePoint!");
-      } else {
-        alert("⚠️ O SharePoint recusou os dados. Código de erro: " + response.status);
-      }
-    })
-    .catch(error => {
-      // Se houver erro de rede ou CORS, o alerta salta na tela em vez de se esconder no console!
-      alert("❌ ERRO DE CONEXÃO: " + error.message);
-    });
+      .then(response => {
+        if (response.ok) {
+          alert("✅ SUCESSO! Turno finalizado e salvo no SharePoint!");
+        } else {
+          alert("⚠️ O SharePoint recusou os dados. Código de erro: " + response.status);
+        }
+      })
+      .catch(error => {
+        // Se houver erro de rede ou CORS, o alerta salta na tela em vez de se esconder no console!
+        alert("❌ ERRO DE CONEXÃO: " + error.message);
+      });
 
   } catch (erroGrave) {
     // Se o JavaScript quebrar ao tentar ler algum dado, ele avisa-o aqui.
