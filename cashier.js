@@ -65,11 +65,32 @@ function calculateTotalCaixa() {
   const diferenca = depositoCalculado - montanteRecebido;
 
   document.getElementById('totalGeralCaixa').innerText = totalGeral.toFixed(2);
-  document.getElementById('depositoDiaCalculado').innerText = depositoCalculado.toFixed(2);
+  
+  const elDeposito = document.getElementById('depositoDiaCalculado');
+  const elDepositoEuro = document.getElementById('depositoDiaEuro');
+  if (depositoCalculado < 0) {
+    elDeposito.innerText = '-';
+    elDeposito.style.color = 'var(--gold)';
+    if (elDepositoEuro) elDepositoEuro.style.display = 'none';
+  } else {
+    elDeposito.innerText = depositoCalculado.toFixed(2);
+    if (elDepositoEuro) elDepositoEuro.style.display = 'inline';
+    const condicaoVerde = (totalEspecie - totalPaidouts + montanteRecebido) > 750.00;
+    if (condicaoVerde) {
+      elDeposito.style.color = '#3d7f4f'; // green
+    } else {
+      elDeposito.style.color = 'var(--gold)';
+    }
+  }
   
   const resDiferenca = document.getElementById('diferencaCaixa');
-  resDiferenca.innerText = diferenca.toFixed(2) + '€';
-  resDiferenca.style.color = diferenca < 0 ? '#ff5757' : (diferenca > 0 ? '#3d7f4f' : 'var(--gold)');
+  if (diferenca < -0.005) {
+    resDiferenca.innerText = diferenca.toFixed(2) + '€';
+    resDiferenca.style.color = '#ff5757';
+  } else {
+    resDiferenca.innerText = '-';
+    resDiferenca.style.color = 'var(--gold)';
+  }
 
   const statusMsg = document.getElementById('statusCaixaMsg');
   if (Math.abs(diferenca) < 0.01 && depositoCalculado > 0) {

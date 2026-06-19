@@ -234,7 +234,7 @@ async function gerarPDF() {
   addLine(`Fundo de Caixa Fixo: 750.00 €`, 11, [0, 0, 0], 6);
   addLine(`Montante Recebido (Sistema): ${recebido} €`, 11, [0, 0, 0], 6);
   addLine(`Total Geral (Espécie + Docs): ${totalGeral} €`, 11, [0, 0, 0], 6);
-  addLine(`DEPÓSITO DO DIA: ${deposito} €`, 13, [0, 38, 58], 7);
+  addLine(deposito === '-' ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${deposito} €`, 13, [0, 38, 58], 7);
   addLine(`Diferença de Caixa: ${diferenca}`, 11, [parseFloat(diferenca) < 0 ? 200 : 0, 0, 0], 8);
 
   const vales = Array.from(document.querySelectorAll('#bodyVales tr'));
