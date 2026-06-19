@@ -1,4 +1,4 @@
-﻿window.tarefasData = {
+window.tarefasData = {
   "noite": [
     {
       "id": "fase1",
@@ -775,6 +775,12 @@
         {
           "title": "Rondas e Imagem",
           "items": [
+            {
+              "text": "Recolher os caixotes de lixo e guardá-los na sala do lixo no piso -1.",
+              "help": null,
+              "optional": true,
+              "sunday": false
+            },
             {
               "text": "<strong>Pisos e Acessos</strong>: Inspeção e destracar portas (Áurea/VIP).",
               "help": null,

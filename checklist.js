@@ -30,6 +30,18 @@ function aplicarExclusivos(turno) {
   $$('.bloco-exclusivo-noturno').forEach(el => {
     el.style.display = turno === 'noite' ? 'block' : 'none';
   });
+
+  const contagemTabBtn = $('[data-tab="tab-contagem"]');
+  if (contagemTabBtn) {
+    if (turno === 'doorman') {
+      contagemTabBtn.style.display = 'none';
+      if (contagemTabBtn.classList.contains('active')) {
+        switchTab('tab-checklist');
+      }
+    } else {
+      contagemTabBtn.style.display = '';
+    }
+  }
 }
 
 function switchTab(tabId) {
@@ -230,33 +242,35 @@ async function gerarPDF() {
   addLine(`Obs. iniciais: ${obsIni}`, 10, [60, 60, 60], 8);
   addLine(`Obs. finais: ${obsFim}`, 10, [60, 60, 60], 8);
 
-  y += 5;
-  addLine(`Fundo de Caixa Fixo: 750.00 €`, 11, [0, 0, 0], 6);
-  addLine(`Montante Recebido (Sistema): ${recebido} €`, 11, [0, 0, 0], 6);
-  addLine(`Total Geral (Espécie + Docs): ${totalGeral} €`, 11, [0, 0, 0], 6);
-  addLine(deposito === '-' ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${deposito} €`, 13, [0, 38, 58], 7);
-  addLine(`Diferença de Caixa: ${diferenca}`, 11, [parseFloat(diferenca) < 0 ? 200 : 0, 0, 0], 8);
+  if (turno !== 'doorman') {
+    y += 5;
+    addLine(`Fundo de Caixa Fixo: 750.00 €`, 11, [0, 0, 0], 6);
+    addLine(`Montante Recebido (Sistema): ${recebido} €`, 11, [0, 0, 0], 6);
+    addLine(`Total Geral (Espécie + Docs): ${totalGeral} €`, 11, [0, 0, 0], 6);
+    addLine(deposito === '-' ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${deposito} €`, 13, [0, 38, 58], 7);
+    addLine(`Diferença de Caixa: ${diferenca}`, 11, [parseFloat(diferenca) < 0 ? 200 : 0, 0, 0], 8);
 
-  const vales = Array.from(document.querySelectorAll('#bodyVales tr'));
-  if (vales.length > 0) {
-    addLine('Detalhamento de Vales / Vouchers:', 11, [198, 166, 103], 6);
-    vales.forEach(tr => {
-      const v = tr.querySelector('.dyn-val').value || '0';
-      const j = tr.querySelector('.dyn-just').value || '-';
-      const d = tr.querySelector('.dyn-dept').value || '-';
-      addLine(` - ${v}€ | Just: ${j} | Dept: ${d}`, 9, [0, 0, 0], 5);
-    });
-  }
+    const vales = Array.from(document.querySelectorAll('#bodyVales tr'));
+    if (vales.length > 0) {
+      addLine('Detalhamento de Vales / Vouchers:', 11, [198, 166, 103], 6);
+      vales.forEach(tr => {
+        const v = tr.querySelector('.dyn-val').value || '0';
+        const j = tr.querySelector('.dyn-just').value || '-';
+        const d = tr.querySelector('.dyn-dept').value || '-';
+        addLine(` - ${v}€ | Just: ${j} | Dept: ${d}`, 9, [0, 0, 0], 5);
+      });
+    }
 
-  const pouts = Array.from(document.querySelectorAll('#bodyPaidouts tr'));
-  if (pouts.length > 0) {
-    addLine('Detalhamento de Paid-outs:', 11, [198, 166, 103], 6);
-    pouts.forEach(tr => {
-      const v = tr.querySelector('.dyn-val').value || '0';
-      const j = tr.querySelector('.dyn-just').value || '-';
-      const r = tr.querySelector('.dyn-room').value || '-';
-      addLine(` - ${v}€ | Just: ${j} | Quarto: ${r}`, 9, [0, 0, 0], 5);
-    });
+    const pouts = Array.from(document.querySelectorAll('#bodyPaidouts tr'));
+    if (pouts.length > 0) {
+      addLine('Detalhamento de Paid-outs:', 11, [198, 166, 103], 6);
+      pouts.forEach(tr => {
+        const v = tr.querySelector('.dyn-val').value || '0';
+        const j = tr.querySelector('.dyn-just').value || '-';
+        const r = tr.querySelector('.dyn-room').value || '-';
+        addLine(` - ${v}€ | Just: ${j} | Quarto: ${r}`, 9, [0, 0, 0], 5);
+      });
+    }
   }
 
   y += 2;
