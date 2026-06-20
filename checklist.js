@@ -45,6 +45,14 @@ function aplicarExclusivos(turno) {
 }
 
 function switchTab(tabId) {
+  if (tabId === 'tab-contagem') {
+    const isStarted = $('#turnoSelecionado').value !== '' && $('#tela2').style.display === 'block';
+    if (!isStarted) {
+      alert('Por favor, seleciona o turno e inicia o processo primeiro.');
+      return;
+    }
+  }
+
   $$('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
@@ -84,6 +92,15 @@ function confirmarTurno(isLoading = false) {
   if (obs) obs.style.display = 'block';
 
   updateAuditorInfo();
+  
+  if (!isLoading) {
+    const cashTurno = $('#cashTurnoAtual');
+    if (cashTurno) cashTurno.value = turno;
+
+    const cashRececionista = $('#cashRececionistaAtual');
+    if (cashRececionista) cashRececionista.value = nome;
+  }
+
   showScreen(2);
 
   if (typeof saveProgress === 'function') saveProgress();
