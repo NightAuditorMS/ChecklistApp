@@ -469,7 +469,7 @@ window.tarefasData = {
               "help": null,
               "optional": true,
               "sunday": false
-            },
+            }
           ]
         },
 	{
@@ -492,7 +492,7 @@ window.tarefasData = {
               "help": "Filtro: 'Detalhes? = Sim'",
               "optional": false,
               "sunday": false
-            },
+            }
           ]
         },
         {
@@ -525,7 +525,7 @@ window.tarefasData = {
           ]
         },
         {
-          "title": Relatórios Manager Blackmoon aos fechos de sábado,
+          "title": "Relatórios Manager Blackmoon aos fechos de sábado",
           "items": [
             {
               "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
@@ -537,7 +537,7 @@ window.tarefasData = {
           ]
         },
         {
-          "title": Relatórios Manager Blackmoon aos fechos de domingo,
+          "title": "Relatórios Manager Blackmoon aos fechos de domingo",
           "items": [
             {
               "text": "Relatório 09. Mapa de Refeições Geral, data fecho de Domingo.",
@@ -570,7 +570,7 @@ window.tarefasData = {
           ]
         },
         {
-          "title": Relatório Clever,
+          "title": "Relatório Clever",
           "items": [
             {
               "text": "Gerar relatório EVOL 12 meses, marcar \"Mostrar todos os dados\" → enviar para e-mail do auditor via Clever → download em Excel → fixar painéis → salvar como .xls → responder a todos no e-mail recebido e anexar ficheiro.",

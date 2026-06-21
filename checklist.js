@@ -507,7 +507,9 @@ async function loadDynamicChecklists() {
               return;
             }
 
-            const optClass = (item.optional || item.sunday) ? ' optional-item' : '';
+            const isDayRestricted = item.dias && Array.isArray(item.dias) && item.dias.length > 0;
+            const isOpt = item.optional || (item.sunday && !isDayRestricted);
+            const optClass = isOpt ? ' optional-item' : '';
             html += `<li class="check-item${optClass}">`;
 
             html += `<button class="help-btn" type="button" aria-expanded="false" aria-label="Mostrar explicação">?</button>`;
@@ -515,13 +517,22 @@ async function loadDynamicChecklists() {
 
             const attrs = [];
             if (item.optional) attrs.push('data-optional="true"');
-            if (item.sunday) attrs.push('data-sunday="true"');
+            if (item.sunday && !isDayRestricted) attrs.push('data-sunday="true"');
 
             html += `<input type="checkbox" ${attrs.join(' ')}>`;
             html += `<span class="item-text">${item.text}`;
 
-            if (item.optional && !item.sunday) html += `<div class="optional-badge">Opcional / conforme necessário</div>`;
-            if (item.sunday) html += `<div class="optional-badge">Somente Domingos</div>`;
+            if (item.optional) {
+              html += `<div class="optional-badge">Opcional / conforme necessário</div>`;
+            } else if (isDayRestricted) {
+              const dayStr = item.dias.map(d => {
+                if (typeof d === 'number') return dayNamesPt[d];
+                return d;
+              }).map(name => name.charAt(0).toUpperCase() + name.slice(1)).join(', ');
+              html += `<div class="optional-badge">Somente ${dayStr}s</div>`;
+            } else if (item.sunday) {
+              html += `<div class="optional-badge">Somente Domingos</div>`;
+            }
             if (item.help) html += `<div class="help-text">${item.help}</div>`;
 
             html += `</span></label></div></li>`;
