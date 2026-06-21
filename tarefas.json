@@ -470,12 +470,29 @@
               "optional": true,
               "sunday": false
             },
+          ]
+        },
+	{
+          "title": "Envio relatórios de CI's, Quebras e Cancelamentos",
+          "items": [
             {
-              "text": "Envio relatórios de CI's, Quebras e Cancelamentos",
-              "help": "Informar o envio dos relatórios por email:\n- 10. Vendas por Documentos (Filtro: 'Agrupar por Setores? = Sim')\n- 31. Cancelamentos de Artigo\n- 32. Consumos Internos (Filtro: 'Detalhes? = Sim')",
+              "text": "10. Vendas por Documentos",
+              "help": "Filtro: 'Agrupar por Setores? = Sim'",
               "optional": false,
               "sunday": false
-            }
+            },
+            {
+              "text": "31. Cancelamentos de Artigo",
+              "help": null,
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "32. Consumos Internos ",
+              "help": "Filtro: 'Detalhes? = Sim'",
+              "optional": false,
+              "sunday": false
+            },
           ]
         },
         {
@@ -508,56 +525,56 @@
           ]
         },
         {
-          "title": null,
+          "title": Relatórios Manager Blackmoon aos fechos de sábado,
           "items": [
             {
               "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
               "help": "Enviar para o Manager do Blackmoon.",
-              "optional": true,
+              "optional": false,
               "sunday": true,
               "dias": ["sábado"]
             }
           ]
         },
         {
-          "title": null,
+          "title": Relatórios Manager Blackmoon aos fechos de domingo,
           "items": [
             {
               "text": "Relatório 09. Mapa de Refeições Geral, data fecho de Domingo.",
               "help": "Enviar para o Manager do Blackmoon.",
-              "optional": true,
+              "optional": false,
               "sunday": true,
               "dias": ["domingo"]
             },
             {
               "text": "Relatório 42. Vendas por Tipo de Cliente, data fecho de Domingo.",
               "help": "Enviar para o Manager do Blackmoon.",
-              "optional": true,
+              "optional": false,
               "sunday": true,
               "dias": ["domingo"]
             },
             {
               "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
               "help": "Enviar para o Manager do Blackmoon.",
-              "optional": true,
+              "optional": false,
               "sunday": true,
               "dias": ["domingo"]
             },
             {
               "text": "Estado Hotel: taxa de ocupação, quartos e hóspedes — print screen.",
               "help": "Enviar para o Manager do Blackmoon.",
-              "optional": true,
+              "optional": false,
               "sunday": true,
               "dias": ["domingo"]
             }
           ]
         },
         {
-          "title": null,
+          "title": Relatório Clever,
           "items": [
             {
               "text": "Gerar relatório EVOL 12 meses, marcar \"Mostrar todos os dados\" → enviar para e-mail do auditor via Clever → download em Excel → fixar painéis → salvar como .xls → responder a todos no e-mail recebido e anexar ficheiro.",
-              "help": "Instruções para enviar o relatório de maneira correta.",
+              "help": "Instruções para enviar o relatório de maneira correta, enviar paro o grupo Clever Evol.",
               "optional": false,
               "sunday": false
             }
