@@ -469,6 +469,12 @@
               "help": null,
               "optional": true,
               "sunday": false
+            },
+            {
+              "text": "Envio relatórios de CI's, Quebras e Cancelamentos",
+              "help": "Informar o envio dos relatórios por email:\n- 10. Vendas por Documentos (Filtro: 'Agrupar por Setores? = Sim')\n- 31. Cancelamentos de Artigo\n- 32. Consumos Internos (Filtro: 'Detalhes? = Sim')",
+              "optional": false,
+              "sunday": false
             }
           ]
         },
@@ -506,9 +512,10 @@
           "items": [
             {
               "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
-              "help": null,
+              "help": "Enviar para o Manager do Blackmoon.",
               "optional": true,
-              "sunday": true
+              "sunday": true,
+              "dias": ["sábado"]
             }
           ]
         },
@@ -517,27 +524,31 @@
           "items": [
             {
               "text": "Relatório 09. Mapa de Refeições Geral, data fecho de Domingo.",
-              "help": null,
+              "help": "Enviar para o Manager do Blackmoon.",
               "optional": true,
-              "sunday": true
+              "sunday": true,
+              "dias": ["domingo"]
             },
             {
               "text": "Relatório 42. Vendas por Tipo de Cliente, data fecho de Domingo.",
-              "help": null,
+              "help": "Enviar para o Manager do Blackmoon.",
               "optional": true,
-              "sunday": true
+              "sunday": true,
+              "dias": ["domingo"]
             },
             {
               "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
-              "help": null,
+              "help": "Enviar para o Manager do Blackmoon.",
               "optional": true,
-              "sunday": true
+              "sunday": true,
+              "dias": ["domingo"]
             },
             {
               "text": "Estado Hotel: taxa de ocupação, quartos e hóspedes — print screen.",
-              "help": null,
+              "help": "Enviar para o Manager do Blackmoon.",
               "optional": true,
-              "sunday": true
+              "sunday": true,
+              "dias": ["domingo"]
             }
           ]
         },

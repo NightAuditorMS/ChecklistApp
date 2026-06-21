@@ -65,7 +65,7 @@ function switchTab(tabId) {
   }
 }
 
-function confirmarTurno(isLoading = false) {
+async function confirmarTurno(isLoading = false) {
   const turno = $('#turnoSelecionado').value;
   const nome = $('#auditorNome').value.trim();
   const data = $('#auditorData').value.trim();
@@ -73,6 +73,10 @@ function confirmarTurno(isLoading = false) {
   if (!isLoading && (!turno || !nome || !data)) {
     alert('Por favor, seleciona o turno, preenche o nome do rececionista e a data.');
     return;
+  }
+
+  if (!isLoading) {
+    await loadDynamicChecklists();
   }
 
   const map = { noite: 'Noite', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
@@ -410,6 +414,60 @@ async function loadDynamicChecklists() {
       data = await res.json();
     }
 
+    // Determine the active date to filter by day of the week
+    let activeDate = new Date();
+    const dateInput = document.getElementById('auditorData');
+    if (dateInput && dateInput.value) {
+      const parts = dateInput.value.split('-');
+      if (parts.length === 3) {
+        activeDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+    } else {
+      try {
+        const saved = localStorage.getItem('nightAuditProgress_v72');
+        if (saved) {
+          const d = JSON.parse(saved);
+          if (d && d.auditorData) {
+            const parts = d.auditorData.split('-');
+            if (parts.length === 3) {
+              activeDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    const dayIndex = activeDate.getDay(); // 0 is Sunday, 6 is Saturday
+    const dayNamesPt = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+    const dayNamesEn = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+    const normalizeDay = (str) => {
+      if (typeof str !== 'string') return '';
+      return str.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace("-feira", "")
+        .trim();
+    };
+
+    const matchesDay = (item, dayIdx) => {
+      if (item.dias && Array.isArray(item.dias) && item.dias.length > 0) {
+        const targetPt = normalizeDay(dayNamesPt[dayIdx]);
+        const targetEn = normalizeDay(dayNamesEn[dayIdx]);
+        return item.dias.some(d => {
+          if (typeof d === 'number') {
+            return d === dayIdx;
+          }
+          if (typeof d === 'string') {
+            const normalized = normalizeDay(d);
+            return normalized === targetPt || normalized === targetEn;
+          }
+          return false;
+        });
+      }
+      return true;
+    };
+
     for (const [turno, phases] of Object.entries(data)) {
       const container = document.getElementById(`checklist-${turno}`);
       if (!container) continue;
@@ -430,12 +488,17 @@ async function loadDynamicChecklists() {
         }
 
         phase.sections.forEach(sec => {
+          const hasRenderedItems = sec.items.some(item => matchesDay(item, dayIndex));
+          if (!hasRenderedItems) return;
+
           if (sec.title) {
             if (phase.title) html += `<h3>${sec.title}</h3>`;
             else html += `<p class="section-header">${sec.title}</p>`;
           }
           html += `<ul>`;
           sec.items.forEach(item => {
+            if (!matchesDay(item, dayIndex)) return;
+
             // Handle download links
             if (item.type === 'download') {
               html += `<li class="download-links">`;
