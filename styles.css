@@ -16,11 +16,131 @@
 }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--bg); color:var(--text); font-family:"Gill Sans Nova Light",Arial,sans-serif; }
-header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:15px 20px; background:var(--surface); border-bottom:2px solid var(--gold); box-shadow:0 2px 4px rgba(0,0,0,.6); position:sticky; top:0; z-index:10; }
-.brand { display:flex; align-items:center; gap:16px; min-width:0; }
-.brand img { height:58px; width:auto; display:block; object-fit:contain; background:#fff; border-radius:6px; padding:4px 8px; }
-.brand h1 { font-size:20px; margin:0; color:var(--gold); }
-#auditorInfo { color:var(--gold); font-size:15px; text-align:right; }
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  background: var(--surface);
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand h1 {
+  font-size: 18px;
+  margin: 0;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-left-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 4px;
+}
+
+.header-datetime {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.weather-text {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.header-divider {
+  width: 1px;
+  height: 38px;
+  background: rgba(198, 166, 103, 0.25);
+  align-self: center;
+}
+
+.header-right-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 4px;
+}
+
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-email {
+  color: var(--gold-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.duty-manager-card {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  gap: 4px;
+}
+
+.duty-manager-label {
+  color: var(--muted);
+}
+
+.duty-manager-value {
+  color: var(--gold-2);
+  font-weight: 600;
+}
+
+.logout-button-styled {
+  border: 1px solid rgba(198, 166, 103, 0.25);
+  background: rgba(198, 166, 103, 0.08);
+  color: var(--gold-2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logout-button-styled:hover {
+  background: rgba(198, 166, 103, 0.2);
+  border-color: var(--gold);
+  color: var(--gold-2);
+  box-shadow: 0 0 15px rgba(198, 166, 103, 0.15);
+}
 .container { padding:20px; max-width:1100px; margin:0 auto; }
 .card { background:var(--surface); border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 2px 4px rgba(255,255,255,.05); border:1px solid var(--border); }
 .phase-btn,.final-btn,.pdf-btn,.secondary-btn { width:100%; padding:14px; font-size:18px; border:none; border-radius:8px; cursor:pointer; transition:.25s ease; }
@@ -91,4 +211,11 @@ input[type="checkbox"] { transform:scale(1.2); margin-top:3px; cursor:pointer; }
 .dynamic-table th, .dynamic-table td { padding: 8px; border: 1px solid var(--border); }
 .total-row { font-size: 18px; font-weight: bold; color: var(--gold); text-align: right; padding: 15px; background: rgba(198,166,103,0.05); border-radius: 8px; margin-top: 10px; border: 1px solid var(--gold); }
 
-@media(max-width:720px) { header{display:block} .brand{margin-bottom:10px} .meta-grid,.actions{grid-template-columns:1fr} #auditorInfo{text-align:left;margin-top:8px} }
+@media(max-width:720px) { 
+  .dashboard-header { display: flex; flex-direction: column; gap: 12px; padding: 12px 16px; align-items: stretch; }
+  .header-left-group { align-items: flex-start; text-align: left; }
+  .header-right-group { align-items: flex-start; text-align: left; }
+  .header-divider { display: none; }
+  .brand { margin-bottom:10px } 
+  .meta-grid,.actions { grid-template-columns:1fr } 
+}

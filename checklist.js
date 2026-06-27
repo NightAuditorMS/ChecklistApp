@@ -559,8 +559,106 @@ async function loadDynamicChecklists() {
   }
 }
 
+// Weather Service for Lisbon
+const WeatherService = {
+  defaultLocation: {
+    latitude: 38.7167,
+    longitude: -9.1333
+  },
+
+  weatherCodeMap(code) {
+    const map = {
+      0: 'Ensolarado',
+      1: 'Pouco nublado',
+      2: 'Parcialmente nublado',
+      3: 'Nublado',
+      45: 'Neblina',
+      48: 'Neblina seca',
+      51: 'Chuvisco leve',
+      53: 'Chuvisco moderado',
+      55: 'Chuvisco denso',
+      56: 'Garoa congelante leve',
+      57: 'Garoa congelante densa',
+      61: 'Chuva fraca',
+      63: 'Chuva moderada',
+      65: 'Chuva forte',
+      66: 'Chuva congelante leve',
+      67: 'Chuva congelante forte',
+      71: 'Neve fraca',
+      73: 'Neve moderada',
+      75: 'Neve forte',
+      77: 'Granizo',
+      80: 'Chuva de pancada',
+      81: 'Chuva intensa de pancada',
+      82: 'Chuva muito intensa de pancada',
+      85: 'Neve de pancada',
+      86: 'Neve intensa de pancada',
+      95: 'Tempestade',
+      96: 'Tempestade com granizo',
+      99: 'Tempestade severa'
+    };
+    return map[code] || 'Tempo indefinido';
+  },
+
+  async fetchForecast() {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${this.defaultLocation.latitude}&longitude=${this.defaultLocation.longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const data = await response.json();
+      const daily = data.daily;
+      if (!daily || !daily.weathercode || daily.weathercode.length === 0) return null;
+      const index = 0;
+      const description = this.weatherCodeMap(daily.weathercode[index]);
+      const min = Math.round(daily.temperature_2m_min[index]);
+      const max = Math.round(daily.temperature_2m_max[index]);
+      return { description, min, max };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  },
+
+  formatForecast(forecast) {
+    if (!forecast) return 'Não foi possível obter a previsão';
+    return `${forecast.description} · min ${forecast.min}° · max ${forecast.max}°`;
+  }
+};
+
+const HeaderController = {
+  async init() {
+    const weatherSummary = document.getElementById('weather-summary');
+    if (weatherSummary) {
+      weatherSummary.textContent = 'A carregar previsão...';
+      const forecast = await WeatherService.fetchForecast();
+      weatherSummary.textContent = WeatherService.formatForecast(forecast);
+    }
+
+    const clockEl = document.getElementById('current-date-time');
+    if (clockEl) {
+      const updateClock = () => {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('pt-PT', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const timeStr = now.toLocaleTimeString('pt-PT', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        clockEl.textContent = `${dateStr} | ${timeStr}`;
+      };
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+  }
+};
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', async () => {
+  HeaderController.init();
   await loadDynamicChecklists();
   if (typeof loadProgress === 'function') loadProgress();
 });

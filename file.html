@@ -8,12 +8,40 @@
 </head>
 <body>
   <a href="#mainContent" class="skip-link">Saltar para o conteúdo</a>
-  <header>
+  <header class="dashboard-header">
     <div class="brand">
-      <img src="./MythicSanaHotelLogoCor.png" alt="Logo Mythic SANA" />
-      <h1>Checklist Operacional Multiturno v1.0</h1>
+      <img src="./MythicSanaHotelLogoCor.png" alt="Sana Mythic Hotel" class="brand-logo-img">
+      <h1>Portal Front Office</h1>
     </div>
-    <div id="auditorInfo">Auditor não identificado</div>
+    <div class="header-controls">
+      <!-- Left Group: DateTime + Weather Forecast -->
+      <div class="header-left-group">
+        <div class="header-datetime">
+          <span id="current-date-time"></span>
+        </div>
+        <div class="header-weather">
+          <span id="weather-summary" class="weather-text">A carregar previsão...</span>
+        </div>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <!-- Right Group: Profile + Duty Manager -->
+      <div class="header-right-group">
+        <div class="header-profile">
+          <span id="auditorInfo" class="profile-email">Auditor não identificado</span>
+          <a href="../PortalFrontOffice/index.html" class="logout-button-styled" style="text-decoration:none;">Dashboard</a>
+        </div>
+        <div class="duty-manager-card">
+          <span class="duty-manager-label">Duty Manager:</span>
+          <span class="duty-manager-value">Tarde / Noite</span>
+        </div>
+      </div>
+
+      <!-- Compatibility fallbacks for JS logic -->
+      <span id="greeting-text" style="display: none;"></span>
+      <span id="header-date" style="display: none;"></span>
+    </div>
   </header>
 
   <main id="mainContent" class="container">
