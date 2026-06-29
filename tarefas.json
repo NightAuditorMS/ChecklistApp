@@ -314,6 +314,12 @@
               "help": null,
               "optional": true,
               "sunday": false
+            },
+            {
+              "text": "Faturas com Vouchers SANA e/ou FHR",
+              "help": null,
+              "optional": true,
+              "sunday": false
             }
           ]
         }
@@ -525,18 +531,6 @@
           ]
         },
         {
-          "title": "Relatórios Manager Blackmoon aos fechos de sábado",
-          "items": [
-            {
-              "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
-              "help": "Enviar para o Manager do Blackmoon.",
-              "optional": false,
-              "sunday": true,
-              "dias": ["sábado"]
-            }
-          ]
-        },
-        {
           "title": "Relatórios Manager Blackmoon aos fechos de domingo",
           "items": [
             {
@@ -548,13 +542,6 @@
             },
             {
               "text": "Relatório 42. Vendas por Tipo de Cliente, data fecho de Domingo.",
-              "help": "Enviar para o Manager do Blackmoon.",
-              "optional": false,
-              "sunday": true,
-              "dias": ["domingo"]
-            },
-            {
-              "text": "Relatório 112. Diário Financeiro por data de lançamento SANA, data fecho de Domingo.",
               "help": "Enviar para o Manager do Blackmoon.",
               "optional": false,
               "sunday": true,
