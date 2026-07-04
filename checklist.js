@@ -26,6 +26,17 @@ function getAllCheckboxes(root = document) { return $$('input[type="checkbox"]:n
 function isOptional(cb) { return cb.dataset.optional === 'true' || cb.dataset.sunday === 'true'; }
 function clearWarnings() { getChecklistItems().forEach(li => li.classList.remove('unchecked-warning')); }
 
+function updateProgressBar() {
+  const cbs = getAllCheckboxes();
+  if (cbs.length === 0) return;
+  const checkedCount = cbs.filter(cb => cb.checked).length;
+  const percentage = Math.round((checkedCount / cbs.length) * 100);
+  const fill = document.getElementById('progress-bar-fill');
+  const text = document.getElementById('progress-text');
+  if (fill) fill.style.width = `${percentage}%`;
+  if (text) text.textContent = `${percentage}% Completo`;
+}
+
 function aplicarExclusivos(turno) {
   $$('.bloco-exclusivo-noturno').forEach(el => {
     el.style.display = turno === 'noite' ? 'block' : 'none';
@@ -73,6 +84,7 @@ function confirmarTurno(isLoading = false) {
 
   updateAuditorInfo();
   showScreen(2);
+  updateProgressBar();
 
   if (typeof saveProgress === 'function') saveProgress();
 }
@@ -150,6 +162,7 @@ function resetTurno() {
   document.body.classList.remove('turno-noite', 'turno-manha', 'turno-tarde', 'turno-doorman');
   showScreen(1);
   updateAuditorInfo();
+  updateProgressBar();
 }
 
 async function finalizarTurno() {
@@ -349,10 +362,26 @@ document.addEventListener('click', e => {
 });
 
 document.addEventListener('change', e => {
-  if (e.target.matches('.section-toggle-all')) return handleSectionToggle(e.target);
+  if (e.target.matches('.section-toggle-all')) {
+    handleSectionToggle(e.target);
+    updateProgressBar();
+    return;
+  }
   if (e.target.matches('#tela2 input[type="checkbox"]')) {
     const sec = e.target.closest('.phase-content, .checklist-continua');
     if (sec) updateSectionToggle(sec);
+    
+    // Trigger Gold Blink effect on checked
+    if (e.target.checked) {
+      const checkItem = e.target.closest('.check-item');
+      if (checkItem) {
+        checkItem.classList.remove('gold-blink');
+        void checkItem.offsetWidth; // Trigger reflow to restart animation
+        checkItem.classList.add('gold-blink');
+      }
+    }
+    
+    updateProgressBar();
   }
   if (typeof saveProgress === 'function') saveProgress();
 });

@@ -134,4 +134,5 @@ function loadProgress() {
   if (typeof updateAllSectionToggles === 'function') updateAllSectionToggles();
   const tSel = document.getElementById('turnoSelecionado');
   if (typeof aplicarExclusivos === 'function') aplicarExclusivos(tSel ? tSel.value : '');
+  if (typeof updateProgressBar === 'function') updateProgressBar();
 }
