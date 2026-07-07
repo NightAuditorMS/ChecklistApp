@@ -8,14 +8,22 @@ function saveProgress() {
       just: tr.querySelector('.dyn-just').value, 
       dept: tr.querySelector('.dyn-dept').value, 
       resp: tr.querySelector('.dyn-resp').value, 
-      date: tr.querySelector('.dyn-date').value
+      date: tr.querySelector('.dyn-date').value,
+      status: tr.dataset.status || 'Pendente',
+      paidBy: tr.dataset.paidBy || '',
+      paidTime: tr.dataset.paidTime || ''
     })),
     paidouts: Array.from(document.querySelectorAll('#bodyPaidouts tr')).map(tr => ({
       val: tr.querySelector('.dyn-val').value, 
       just: tr.querySelector('.dyn-just').value, 
       room: tr.querySelector('.dyn-room').value, 
       resp: tr.querySelector('.dyn-resp').value, 
-      date: tr.querySelector('.dyn-date').value
+      date: tr.querySelector('.dyn-date').value,
+      status: tr.dataset.status || 'Pendente',
+      reimbursed: tr.dataset.reimbursed || '0',
+      pending: tr.dataset.pending || '0',
+      reimbursedBy: tr.dataset.reimbursedBy || '',
+      reimbursedTime: tr.dataset.reimbursedTime || ''
     })),
     meta: {
       tAtual: document.querySelector('#cashTurnoAtual')?.value || '', 
@@ -100,6 +108,11 @@ function loadProgress() {
             lastRow.querySelector('.dyn-dept').value = v.dept || '';
             lastRow.querySelector('.dyn-resp').value = v.resp || '';
             lastRow.querySelector('.dyn-date').value = v.date || '';
+            lastRow.dataset.status = v.status || 'Pendente';
+            lastRow.dataset.paidBy = v.paidBy || '';
+            lastRow.dataset.paidTime = v.paidTime || '';
+            updateValeRowUI(lastRow);
+            autoResizeTextArea(lastRow.querySelector('.dyn-just'));
           }
         });
         
@@ -112,6 +125,13 @@ function loadProgress() {
             lastRow.querySelector('.dyn-room').value = p.room || '';
             lastRow.querySelector('.dyn-resp').value = p.resp || '';
             lastRow.querySelector('.dyn-date').value = p.date || '';
+            lastRow.dataset.status = p.status || 'Pendente';
+            lastRow.dataset.reimbursed = p.reimbursed || '0';
+            lastRow.dataset.pending = p.pending || '0';
+            lastRow.dataset.reimbursedBy = p.reimbursedBy || '';
+            lastRow.dataset.reimbursedTime = p.reimbursedTime || '';
+            updatePaidoutRowUI(lastRow);
+            autoResizeTextArea(lastRow.querySelector('.dyn-just'));
           }
         });
       }

@@ -200,8 +200,90 @@ async function finalizarTurno() {
       return;
     }
   }
-  if (confirm('Checklist completa. Deseja finalizar o turno, gerar PDF e reiniciar?')) {
-    await gerarPDF();
+  
+  if (confirm('Checklist completa. Deseja finalizar o turno, gerar PDFs e reiniciar?')) {
+    const auditor = $('#auditorNome')?.value?.trim() || 'Rececionista';
+    const data = $('#auditorData')?.value?.trim() || new Date().toISOString().split('T')[0];
+    
+    // Generate Checklist PDF
+    const chResult = await gerarChecklistPDFObject();
+    
+    // Generate Caixa PDF
+    let cxResult = null;
+    if (turno !== 'doorman') {
+      cxResult = await gerarCaixaPDF();
+    }
+    
+    // Save to local database
+    saveShiftToDatabase({
+      turno: turno,
+      auditor: auditor,
+      data: data,
+      obsIniciais: $('#obsIniciais')?.value || '',
+      obsFinais: $('#obsFinais')?.value || '',
+      proto: proto || '',
+      checklistChecks: typeof getAllCheckboxes === 'function' ? getAllCheckboxes().map(cb => ({
+        label: cb.closest('.check-label')?.querySelector('.item-text')?.textContent?.replace(/\?/g, '')?.trim() || cb.closest('.check-label')?.textContent?.trim() || '',
+        checked: cb.checked
+      })) : [],
+      cash: turno !== 'doorman' ? {
+        inputs: Array.from(document.querySelectorAll('.cash-input:not(.dyn-val)')).map(i => ({ val: i.value, denomination: i.dataset.value })),
+        totalNotas: parseFloat(document.getElementById('totalNotasSum')?.innerText) || 0,
+        totalMoedas: parseFloat(document.getElementById('totalMoedasSum')?.innerText) || 0,
+        totalVales: parseFloat(document.getElementById('totalValesSum')?.innerText) || 0,
+        totalPaidouts: parseFloat(document.getElementById('totalPaidoutsSum')?.innerText) || 0,
+        totalGeral: parseFloat(document.getElementById('totalGeralCaixa')?.innerText) || 0,
+        montanteRecebido: parseFloat(document.getElementById('montanteRecebidoDia').value) || 0,
+        deposito: parseFloat(document.getElementById('depositoDiaCalculado')?.innerText) || 0,
+        diferenca: parseFloat(document.getElementById('diferencaCaixa')?.innerText) || 0,
+        vales: Array.from(document.querySelectorAll('#bodyVales tr')).map(tr => ({
+          val: tr.querySelector('.dyn-val').value, 
+          just: tr.querySelector('.dyn-just').value, 
+          dept: tr.querySelector('.dyn-dept').value, 
+          resp: tr.querySelector('.dyn-resp').value, 
+          date: tr.querySelector('.dyn-date').value,
+          status: tr.dataset.status || 'Pendente',
+          paidBy: tr.dataset.paidBy || '',
+          paidTime: tr.dataset.paidTime || ''
+        })),
+        paidouts: Array.from(document.querySelectorAll('#bodyPaidouts tr')).map(tr => ({
+          val: tr.querySelector('.dyn-val').value, 
+          just: tr.querySelector('.dyn-just').value, 
+          room: tr.querySelector('.dyn-room').value, 
+          resp: tr.querySelector('.dyn-resp').value, 
+          date: tr.querySelector('.dyn-date').value,
+          status: tr.dataset.status || 'Pendente',
+          reimbursed: tr.dataset.reimbursed || '0',
+          pending: tr.dataset.pending || '0',
+          reimbursedBy: tr.dataset.reimbursedBy || '',
+          reimbursedTime: tr.dataset.reimbursedTime || ''
+        })),
+        meta: {
+          tAtual: $('#cashTurnoAtual')?.value || '',
+          rAtual: $('#cashRececionistaAtual')?.value || '',
+          tProx: $('#cashTurnoProximo')?.value || '',
+          rProx: $('#cashRececionistaProximo')?.value || ''
+        }
+      } : null
+    });
+
+    // Send webhooks to Power Automate (SharePoint)
+    let webhookSuccess = true;
+    if (chResult) {
+      const ok = await triggerWebhook(chResult.pdfNome, chResult.pdfBase64, 'Checklist');
+      if (!ok) webhookSuccess = false;
+    }
+    if (cxResult) {
+      const ok = await triggerWebhook(cxResult.pdfNome, cxResult.pdfBase64, 'Caixa');
+      if (!ok) webhookSuccess = false;
+    }
+
+    if (webhookSuccess) {
+      alert("✅ SUCESSO! Turno finalizado, PDFs descarregados e salvos no SharePoint!");
+    } else {
+      alert("⚠️ Turno finalizado, mas houve falha ao guardar no SharePoint (verifique a consola).");
+    }
+
     try {
       const saved = localStorage.getItem(storageKey); // Requires storageKey from storage.js
       if (saved) {
@@ -212,6 +294,11 @@ async function finalizarTurno() {
           d.cash.meta.tProx = '';
           d.cash.meta.rProx = '';
           d.cash.meta.recebido = '0';
+          d.cash.vales = [];
+          d.cash.paidouts = [];
+          if(d.cash.inputs) {
+            d.cash.inputs = d.cash.inputs.map(() => ({val: '0'}));
+          }
         }
         d.turno = d.cash?.meta?.tAtual || '';
         d.auditorNome = d.cash?.meta?.rAtual || '';
@@ -225,8 +312,50 @@ async function finalizarTurno() {
   }
 }
 
-async function gerarPDF() {
-  if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return; }
+async function triggerWebhook(pdfNome, pdfBase64, type) {
+  const turno = $('#turnoSelecionado')?.value || '';
+  const auditor = $('#auditorNome')?.value?.trim() || 'Rececionista';
+  const totalGeral = $('#totalGeralCaixa')?.innerText || '0.00';
+  const diferenca = $('#diferencaCaixa')?.innerText || '0.00';
+  const obsIni = $('#obsIniciais')?.value || 'Sem observações.';
+  
+  const payload = {
+    dataHora: new Date().toLocaleString('pt-PT'),
+    turno: turno,
+    rececionista: auditor,
+    totalGeralCaixa: parseFloat(totalGeral) || 0,
+    diferencaCaixa: parseFloat(diferenca) || 0,
+    obsIniciais: `[${type}] ` + obsIni,
+    obsFinais: `Fecho concluído via app. Relatório tipo: ${type}`,
+    pdfNome: pdfNome,
+    pdfConteudoBase64: pdfBase64
+  };
+
+  const webhookUrl = "https://defaulte3dc9b5c8d2143428af283327ca360.e3.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a90ca4cb88204727a3bf23354a19cf91/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HE9JTgBLGHRX3RZT7qVsSzpnLojaOKhxMHVNssyz8xw";
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (response.ok) {
+      console.log(`✅ SUCESSO! PDF [${type}] enviado para SharePoint!`);
+      return true;
+    } else {
+      console.warn(`⚠️ O SharePoint recusou o PDF [${type}]. Status: ${response.status}`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`❌ ERRO DE CONEXÃO webhook para [${type}]: ${error.message}`);
+    return false;
+  }
+}
+
+async function gerarChecklistPDFObject() {
+  if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return null; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   let y = 15;
@@ -323,51 +452,558 @@ async function gerarPDF() {
 
   const safe = sanitizeFileName(`Checklist_${map[turno] || turno}_${data}_${auditor}`) || 'ChecklistComprovativo';
   doc.save(`${safe}.pdf`);
-  // --- INÍCIO DO BLOCO DETETIVE ---
-  try {
-    const pdfBase64 = doc.output('datauristring').split(',')[1];
 
-    // O sinal de interrogação (?) previne que o código quebre se o elemento não existir na tela
-    const payload = {
-      dataHora: new Date().toLocaleString('pt-PT'),
-      turno: turno,
-      rececionista: auditor,
-      totalGeralCaixa: parseFloat(document.getElementById('totalGeralCaixa')?.innerText) || 0,
-      diferencaCaixa: parseFloat(document.getElementById('diferencaCaixa')?.innerText) || 0,
-      obsIniciais: document.querySelector('.dyn-just')?.value || "Sem observações iniciais.",
-      obsFinais: "Fecho concluído via app.",
-      pdfNome: `${safe}.pdf`,
-      pdfConteudoBase64: pdfBase64
-    };
+  return {
+    pdfNome: `${safe}.pdf`,
+    pdfBase64: doc.output('datauristring').split(',')[1]
+  };
+}
 
-    // Replace this string with the actual URL containing the &sig= parameter
-    const webhookUrl = "https://defaulte3dc9b5c8d2143428af283327ca360.e3.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a90ca4cb88204727a3bf23354a19cf91/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HE9JTgBLGHRX3RZT7qVsSzpnLojaOKhxMHVNssyz8xw";
+async function gerarCaixaPDF() {
+  if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return null; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  let y = 15;
+  const margin = 10, pw = 190;
 
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    })
-      .then(response => {
-        if (response.ok) {
-          alert("✅ SUCESSO! Turno finalizado e salvo no SharePoint!");
-        } else {
-          alert("⚠️ O SharePoint recusou os dados. Código de erro: " + response.status);
-        }
-      })
-      .catch(error => {
-        // Se houver erro de rede ou CORS, o alerta salta na tela em vez de se esconder no console!
-        alert("❌ ERRO DE CONEXÃO: " + error.message);
-      });
-
-  } catch (erroGrave) {
-    // Se o JavaScript quebrar ao tentar ler algum dado, ele avisa-o aqui.
-    alert("❌ ERRO NO CÓDIGO DA PÁGINA: " + erroGrave.message);
+  function addLine(txt, size = 11, color = [0, 0, 0], gap = 6) {
+    doc.setFontSize(size); doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(String(txt), pw);
+    if (y + (lines.length * 5) > 285) { doc.addPage(); y = 15; }
+    doc.text(lines, margin, y);
+    y += Math.max(gap, lines.length * 5);
   }
-  // --- FIM DO BLOCO DETETIVE ---
 
+  const turno = $('#turnoSelecionado')?.value || '';
+  const map = { noite: 'Night Audit', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
+  const auditor = $('#auditorNome')?.value?.trim() || 'Rececionista';
+  const data = $('#auditorData')?.value?.trim() || 'Não informada';
+  
+  const cashTurnoAtual = $('#cashTurnoAtual')?.value || '';
+  const cashRececionistaAtual = $('#cashRececionistaAtual')?.value || '';
+  const cashTurnoProximo = $('#cashTurnoProximo')?.value || '';
+  const cashRececionistaProximo = $('#cashRececionistaProximo')?.value || '';
+
+  const totalGeral = $('#totalGeralCaixa')?.innerText || '0.00';
+  const deposito = $('#depositoDiaCalculado')?.innerText || '0.00';
+  const diferenca = $('#diferencaCaixa')?.innerText || '0.00';
+  const recebido = $('#montanteRecebidoDia')?.value || '0.00';
+
+  doc.setFontSize(20); doc.setTextColor(0, 38, 58);
+  doc.text(`Contagem de Caixa - Comprovativo`, 10, y); y += 8;
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 200, y); y += 8;
+
+  addLine(`Rececionista Turno Atual: ${cashRececionistaAtual || auditor} (${map[cashTurnoAtual] || map[turno] || cashTurnoAtual})`);
+  addLine(`Data de Trabalho: ${data}`);
+  addLine(`Próximo Rececionista: ${cashRececionistaProximo || 'N/A'} (${map[cashTurnoProximo] || 'N/A'})`);
+  addLine(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, 10, [60, 60, 60]);
+
+  y += 5;
+  addLine(`FUNDO DE CAIXA FIXO: 750.00 €`, 11, [0, 0, 0], 6);
+  addLine(`Montante Recebido (Sistema): ${recebido} €`, 11, [0, 0, 0], 6);
+  addLine(`Total Geral (Espécie + Docs): ${totalGeral} €`, 11, [0, 0, 0], 6);
+  addLine(deposito === '-' ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${deposito} €`, 13, [0, 38, 58], 7);
+  addLine(`Diferença de Caixa: ${diferenca}`, 11, [parseFloat(diferenca) < 0 ? 200 : 0, 0, 0], 8);
+
+  y += 5;
+  addLine('Detalhamento de Espécie:', 13, [0, 38, 58], 7);
+
+  const notesInputs = Array.from(document.querySelectorAll('#tableNotas tbody .cash-input'));
+  let notesStr = "Notas: ";
+  notesInputs.forEach(i => {
+    const qty = parseInt(i.value) || 0;
+    if (qty > 0) {
+      notesStr += `${qty}x${i.dataset.value}€ | `;
+    }
+  });
+  if (notesStr === "Notas: ") notesStr += "Nenhuma nota declarada.";
+  else notesStr = notesStr.slice(0, -3);
+  addLine(notesStr, 10, [0, 0, 0], 6);
+
+  const coinsInputs = Array.from(document.querySelectorAll('#tableMoedas tbody .cash-input'));
+  let coinsStr = "Moedas: ";
+  coinsInputs.forEach(i => {
+    const qty = parseInt(i.value) || 0;
+    if (qty > 0) {
+      coinsStr += `${qty}x${i.dataset.value}€ | `;
+    }
+  });
+  if (coinsStr === "Moedas: ") coinsStr += "Nenhuma moeda declarada.";
+  else coinsStr = coinsStr.slice(0, -3);
+  addLine(coinsStr, 10, [0, 0, 0], 8);
+
+  const vales = Array.from(document.querySelectorAll('#bodyVales tr'));
+  if (vales.length > 0) {
+    y += 2;
+    addLine('Detalhamento de Vales / Vouchers:', 13, [0, 38, 58], 7);
+    vales.forEach(tr => {
+      const v = tr.querySelector('.dyn-val').value || '0';
+      const j = tr.querySelector('.dyn-just').value || '-';
+      const d = tr.querySelector('.dyn-dept').value || '-';
+      const r = tr.querySelector('.dyn-resp').value || '-';
+      const date = tr.querySelector('.dyn-date').value || '-';
+      const status = tr.dataset.status || 'Pendente';
+      const paidBy = tr.dataset.paidBy || '';
+      const paidTime = tr.dataset.paidTime || '';
+      
+      let statusStr = status;
+      if (status === 'Pago') {
+        statusStr = `PAGO por ${paidBy} em ${paidTime}`;
+      }
+      
+      addLine(` - ${v}€ | Just: ${j} | Dept: ${d} | Resp: ${r} | Data: ${date} | Estado: ${statusStr}`, 9, [0, 0, 0], 5);
+    });
+  }
+
+  const pouts = Array.from(document.querySelectorAll('#bodyPaidouts tr'));
+  if (pouts.length > 0) {
+    y += 4;
+    addLine('Detalhamento de Paid-outs:', 13, [0, 38, 58], 7);
+    pouts.forEach(tr => {
+      const v = parseFloat(tr.querySelector('.dyn-val').value) || 0;
+      const j = tr.querySelector('.dyn-just').value || '-';
+      const rm = tr.querySelector('.dyn-room').value || '-';
+      const r = tr.querySelector('.dyn-resp').value || '-';
+      const date = tr.querySelector('.dyn-date').value || '-';
+      
+      const status = tr.dataset.status || 'Pendente';
+      const reimbursed = parseFloat(tr.dataset.reimbursed) || 0;
+      const pending = parseFloat(tr.dataset.pending) || 0;
+      const actionBy = tr.dataset.reimbursedBy || '';
+      const actionTime = tr.dataset.reimbursedTime || '';
+      
+      let reimbStr = "Pendente";
+      if (status === 'Reembolsado') {
+        reimbStr = `REEMBOLSADO INTEGRALMENTE por ${actionBy} em ${actionTime}`;
+      } else if (status === 'Parcial') {
+        reimbStr = `REEMBOLSADO PARCIALMENTE: Recebido ${reimbursed.toFixed(2)}€, Falta Reembolsar ${pending.toFixed(2)}€ (por ${actionBy} em ${actionTime})`;
+      }
+      
+      addLine(` - Original: ${v.toFixed(2)}€ | Just: ${j} | Quarto: ${rm} | Resp: ${r} | Data: ${date} | Estado: ${reimbStr}`, 9, [0, 0, 0], 5);
+    });
+  }
+
+  y += 10;
+  addLine('Assinatura do Rececionista:', 11, [20, 20, 20], 12);
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 100, y); y += 6;
+
+  const safe = sanitizeFileName(`Caixa_${map[cashTurnoAtual] || cashTurnoAtual || 'Turno'}_${data}_${cashRececionistaAtual || auditor}`) || 'ComprovativoCaixa';
+  doc.save(`${safe}.pdf`);
+
+  return {
+    pdfNome: `${safe}.pdf`,
+    pdfBase64: doc.output('datauristring').split(',')[1]
+  };
+}
+
+// Local Database Functions
+function saveShiftToDatabase(shiftData) {
+  try {
+    const key = 'night_audit_db_v1';
+    const db = JSON.parse(localStorage.getItem(key) || '[]');
+    shiftData.id = 'shift-' + Date.now();
+    shiftData.timestamp = Date.now();
+    db.unshift(shiftData);
+    localStorage.setItem(key, JSON.stringify(db));
+  } catch (e) {
+    console.error('Error saving shift to database:', e);
+  }
+}
+
+function exportDatabase() {
+  const db = localStorage.getItem('night_audit_db_v1') || '[]';
+  const blob = new Blob([db], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `night_audit_database_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importDatabase(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        if (confirm(`Deseja importar ${data.length} registos? Isso irá substituir o histórico atual.`)) {
+          localStorage.setItem('night_audit_db_v1', JSON.stringify(data));
+          renderHistoryTab();
+          alert('Histórico importado com sucesso!');
+        }
+      } else {
+        alert('Ficheiro inválido. A base de dados deve ser um array JSON.');
+      }
+    } catch(err) {
+      alert('Erro ao ler ficheiro: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  input.value = ''; // Reset file input
+}
+
+function clearDatabase() {
+  if (confirm('Tem a certeza que deseja limpar TODO o histórico de documentos? Esta ação não pode ser desfeita.')) {
+    localStorage.removeItem('night_audit_db_v1');
+    renderHistoryTab();
+    alert('Histórico limpo.');
+  }
+}
+
+// History tab columns rendering engine
+function renderHistoryTab() {
+  const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+  
+  const chContainer = document.getElementById('historyChecklistList');
+  const cxContainer = document.getElementById('historyCaixaList');
+  const poContainer = document.getElementById('historyPaidoutsList');
+  const vaContainer = document.getElementById('historyValesList');
+  
+  chContainer.innerHTML = '';
+  cxContainer.innerHTML = '';
+  poContainer.innerHTML = '';
+  vaContainer.innerHTML = '';
+  
+  if (db.length === 0) {
+    const emptyMsg = '<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Sem registos.</div>';
+    chContainer.innerHTML = emptyMsg;
+    cxContainer.innerHTML = emptyMsg;
+    poContainer.innerHTML = emptyMsg;
+    vaContainer.innerHTML = emptyMsg;
+    return;
+  }
+  
+  const map = { noite: 'Night Audit', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
+  
+  let allPaidouts = [];
+  let allVales = [];
+
+  db.forEach((record, recordIndex) => {
+    // Column 1: Checklist Card
+    const chCard = document.createElement('div');
+    chCard.className = 'history-card';
+    const checkedCount = (record.checklistChecks || []).filter(c => c.checked).length;
+    const totalCount = (record.checklistChecks || []).length;
+    chCard.innerHTML = `
+      <div class="history-card-header">
+        <span class="history-card-title">${map[record.turno] || record.turno}</span>
+        <span class="history-card-date">${record.data}</span>
+      </div>
+      <div class="history-card-body">
+        <strong>Rececionista:</strong> ${record.auditor}<br>
+        <strong>Tarefas:</strong> ${checkedCount}/${totalCount} concluídas<br>
+        <strong>Obs:</strong> ${record.obsFinais ? record.obsFinais.substring(0, 50) + (record.obsFinais.length > 50 ? '...' : '') : 'N/A'}
+      </div>
+      <div class="history-card-actions">
+        <button class="history-pdf-btn" onclick="regenerateChecklistPDF(${recordIndex})">Descarregar PDF</button>
+      </div>
+    `;
+    chContainer.appendChild(chCard);
+
+    // Column 2: Caixa Card
+    if (record.cash) {
+      const cxCard = document.createElement('div');
+      cxCard.className = 'history-card';
+      const dep = record.cash.deposito;
+      const dif = record.cash.diferenca;
+      
+      cxCard.innerHTML = `
+        <div class="history-card-header">
+          <span class="history-card-title">Contagem Caixa</span>
+          <span class="history-card-date">${record.data}</span>
+        </div>
+        <div class="history-card-body">
+          <strong>Rececionista:</strong> ${record.cash.meta?.rAtual || record.auditor}<br>
+          <strong>Total Geral:</strong> ${record.cash.totalGeral.toFixed(2)}€<br>
+          <strong>Depósito:</strong> ${dep < 0 || isNaN(dep) ? '-' : dep.toFixed(2) + '€'}<br>
+          <strong>Diferença:</strong> ${dif < -0.005 ? `<span style="color:#ff5757; font-weight:bold;">${dif.toFixed(2)}€</span>` : '-'}
+        </div>
+        <div class="history-card-actions">
+          <button class="history-pdf-btn" onclick="regenerateCaixaPDF(${recordIndex})">Descarregar PDF</button>
+        </div>
+      `;
+      cxContainer.appendChild(cxCard);
+
+      // Accumulate logs
+      if (record.cash.paidouts) {
+        record.cash.paidouts.forEach(p => {
+          allPaidouts.push({ ...p, auditor: record.auditor, shift: record.turno, shiftDate: record.data });
+        });
+      }
+      if (record.cash.vales) {
+        record.cash.vales.forEach(v => {
+          allVales.push({ ...v, auditor: record.auditor, shift: record.turno, shiftDate: record.data });
+        });
+      }
+    }
+  });
+
+  // Column 3 - Paidouts History Box
+  if (allPaidouts.length === 0) {
+    poContainer.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Sem paid-outs registados.</div>';
+  } else {
+    allPaidouts.forEach(p => {
+      const poCard = document.createElement('div');
+      poCard.className = 'history-card';
+      
+      const val = parseFloat(p.val) || 0;
+      const reimbursed = parseFloat(p.reimbursed) || 0;
+      const pending = parseFloat(p.pending) || 0;
+      
+      let statusBadge = '';
+      let logMeta = '';
+      if (p.status === 'Reembolsado') {
+        statusBadge = `<span style="color:var(--success); font-weight:bold; font-size:11px;">Reembolsado</span>`;
+        logMeta = `<div style="font-size:10px; color:var(--muted); margin-top:5px; border-top:1px dashed var(--border); padding-top:4px;">
+                     Reembolsado por <strong>${p.reimbursedBy || 'Rececionista'}</strong> em ${p.reimbursedTime || p.shiftDate}
+                   </div>`;
+      } else if (p.status === 'Parcial') {
+        statusBadge = `<span style="color:var(--gold); font-weight:bold; font-size:11px;">Reembolso Parcial</span>`;
+        logMeta = `<div style="font-size:10px; color:var(--muted); margin-top:5px; border-top:1px dashed var(--border); padding-top:4px;">
+                     Reembolsado: <strong>${reimbursed.toFixed(2)}€</strong> (Falta reembolsar <strong>${pending.toFixed(2)}€</strong>)<br>
+                     Registado por <strong>${p.reimbursedBy || 'Rececionista'}</strong> em ${p.reimbursedTime || p.shiftDate}
+                   </div>`;
+      } else {
+        statusBadge = `<span style="color:var(--muted); font-weight:bold; font-size:11px;">Pendente</span>`;
+      }
+
+      poCard.innerHTML = `
+        <div class="history-card-header">
+          <span class="history-card-title">${val.toFixed(2)}€</span>
+          ${statusBadge}
+        </div>
+        <div class="history-card-body">
+          <strong>Justificação:</strong> ${p.just || '-'}<br>
+          <strong>Quarto:</strong> ${p.room || '-'} | <strong>Resp:</strong> ${p.resp || '-'}<br>
+          <strong>Fecho:</strong> ${p.shiftDate} (${map[p.shift] || p.shift} por ${p.auditor})
+          ${logMeta}
+        </div>
+      `;
+      poContainer.appendChild(poCard);
+    });
+  }
+
+  // Column 3 - Vales History Box
+  if (allVales.length === 0) {
+    vaContainer.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Sem vales registados.</div>';
+  } else {
+    allVales.forEach(v => {
+      const vaCard = document.createElement('div');
+      vaCard.className = 'history-card';
+      
+      const val = parseFloat(v.val) || 0;
+      let statusBadge = '';
+      let logMeta = '';
+      if (v.status === 'Pago') {
+        statusBadge = `<span style="color:var(--success); font-weight:bold; font-size:11px;">Pago</span>`;
+        logMeta = `<div style="font-size:10px; color:var(--muted); margin-top:5px; border-top:1px dashed var(--border); padding-top:4px;">
+                     Pago por <strong>${v.paidBy || 'Rececionista'}</strong> em ${v.paidTime || v.shiftDate}
+                   </div>`;
+      } else {
+        statusBadge = `<span style="color:var(--muted); font-weight:bold; font-size:11px;">Pendente</span>`;
+      }
+
+      vaCard.innerHTML = `
+        <div class="history-card-header">
+          <span class="history-card-title">${val.toFixed(2)}€</span>
+          ${statusBadge}
+        </div>
+        <div class="history-card-body">
+          <strong>Justificação:</strong> ${v.just || '-'}<br>
+          <strong>Dept:</strong> ${v.dept || '-'} | <strong>Resp:</strong> ${v.resp || '-'}<br>
+          <strong>Fecho:</strong> ${v.shiftDate} (${map[v.shift] || v.shift} por ${v.auditor})
+          ${logMeta}
+        </div>
+      `;
+      vaContainer.appendChild(vaCard);
+    });
+  }
+}
+
+function regenerateChecklistPDF(recordIndex) {
+  const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+  const record = db[recordIndex];
+  if (!record) return;
+
+  if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  let y = 15;
+  const margin = 10, pw = 190;
+
+  function addLine(txt, size = 11, color = [0, 0, 0], gap = 6) {
+    doc.setFontSize(size); doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(String(txt), pw);
+    if (y + (lines.length * 5) > 285) { doc.addPage(); y = 15; }
+    doc.text(lines, margin, y);
+    y += Math.max(gap, lines.length * 5);
+  }
+
+  const map = { noite: 'Night Audit', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
+  
+  doc.setFontSize(20); doc.setTextColor(0, 38, 58);
+  doc.text(`Checklist ${map[record.turno] || record.turno} - Comprovativo (Arquivo)`, 10, y); y += 8;
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 200, y); y += 8;
+
+  addLine(`Auditor: ${record.auditor}`);
+  addLine(`Data: ${record.data}`);
+  addLine(`Protocolo MySana: ${record.proto || 'N/A'}`);
+  addLine(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, 10, [60, 60, 60]);
+  addLine(`Obs. iniciais: ${record.obsIniciais || 'N/A'}`, 10, [60, 60, 60], 8);
+  addLine(`Obs. finais: ${record.obsFinais || 'N/A'}`, 10, [60, 60, 60], 8);
+
+  if (record.cash) {
+    y += 5;
+    addLine(`Fundo de Caixa Fixo: 750.00 €`, 11, [0, 0, 0], 6);
+    addLine(`Montante Recebido (Sistema): ${record.cash.montanteRecebido.toFixed(2)} €`, 11, [0, 0, 0], 6);
+    addLine(`Total Geral (Espécie + Docs): ${record.cash.totalGeral.toFixed(2)} €`, 11, [0, 0, 0], 6);
+    const dep = record.cash.deposito;
+    addLine(dep < 0 || isNaN(dep) ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${dep.toFixed(2)} €`, 13, [0, 38, 58], 7);
+    addLine(`Diferença de Caixa: ${record.cash.diferenca.toFixed(2)} €`, 11, [record.cash.diferenca < 0 ? 200 : 0, 0, 0], 8);
+
+    if (record.cash.vales && record.cash.vales.length > 0) {
+      addLine('Detalhamento de Vales / Vouchers:', 11, [198, 166, 103], 6);
+      record.cash.vales.forEach(v => {
+        addLine(` - ${v.val}€ | Just: ${v.just} | Dept: ${v.dept}`, 9, [0, 0, 0], 5);
+      });
+    }
+
+    if (record.cash.paidouts && record.cash.paidouts.length > 0) {
+      addLine('Detalhamento de Paid-outs:', 11, [198, 166, 103], 6);
+      record.cash.paidouts.forEach(p => {
+        addLine(` - ${p.val}€ | Just: ${p.just} | Quarto: ${p.room}`, 9, [0, 0, 0], 5);
+      });
+    }
+  }
+
+  y += 2;
+  addLine('Itens concluídos:', 15, [0, 38, 58], 8);
+  let count = 0;
+  (record.checklistChecks || []).forEach(item => {
+    if (item.checked) {
+      count++;
+      addLine(`• ${item.label}`, 10, [0, 0, 0], 6);
+    }
+  });
+  if (!count) addLine('Nenhum item concluído foi marcado.', 10, [120, 0, 0], 6);
+  addLine(`Total: ${count} itens concluídos`, 11, [0, 38, 58], 8);
+  addLine(`Rececionista: ${record.auditor}`, 12, [0, 38, 58], 6);
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 100, y); y += 6;
+  addLine('Assinatura manual:', 11, [20, 20, 20], 8);
+
+  const safe = sanitizeFileName(`Checklist_${map[record.turno] || record.turno}_${record.data}_${record.auditor}`) || 'ChecklistComprovativo';
+  doc.save(`${safe}_Arquivo.pdf`);
+}
+
+function regenerateCaixaPDF(recordIndex) {
+  const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+  const record = db[recordIndex];
+  if (!record || !record.cash) return;
+
+  if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  let y = 15;
+  const margin = 10, pw = 190;
+
+  function addLine(txt, size = 11, color = [0, 0, 0], gap = 6) {
+    doc.setFontSize(size); doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(String(txt), pw);
+    if (y + (lines.length * 5) > 285) { doc.addPage(); y = 15; }
+    doc.text(lines, margin, y);
+    y += Math.max(gap, lines.length * 5);
+  }
+
+  const map = { noite: 'Night Audit', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
+  const cash = record.cash;
+  const tAtual = cash.meta?.tAtual || record.turno;
+  const rAtual = cash.meta?.rAtual || record.auditor;
+  const tProx = cash.meta?.tProx || 'N/A';
+  const rProx = cash.meta?.rProx || 'N/A';
+
+  doc.setFontSize(20); doc.setTextColor(0, 38, 58);
+  doc.text(`Contagem de Caixa - Comprovativo (Arquivo)`, 10, y); y += 8;
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 200, y); y += 8;
+
+  addLine(`Rececionista Turno Atual: ${rAtual} (${map[tAtual] || tAtual})`);
+  addLine(`Data de Trabalho: ${record.data}`);
+  addLine(`Próximo Rececionista: ${rProx} (${map[tProx] || tProx})`);
+  addLine(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, 10, [60, 60, 60]);
+
+  y += 5;
+  addLine(`FUNDO DE CAIXA FIXO: 750.00 €`, 11, [0, 0, 0], 6);
+  addLine(`Montante Recebido (Sistema): ${cash.montanteRecebido.toFixed(2)} €`, 11, [0, 0, 0], 6);
+  addLine(`Total Geral (Espécie + Docs): ${cash.totalGeral.toFixed(2)} €`, 11, [0, 0, 0], 6);
+  const dep = cash.deposito;
+  addLine(dep < 0 || isNaN(dep) ? 'DEPÓSITO DO DIA: -' : `DEPÓSITO DO DIA: ${dep.toFixed(2)} €`, 13, [0, 38, 58], 7);
+  addLine(`Diferença de Caixa: ${cash.diferenca.toFixed(2)} €`, 11, [cash.diferenca < 0 ? 200 : 0, 0, 0], 8);
+
+  y += 5;
+  addLine('Detalhamento de Espécie declarada:', 13, [0, 38, 58], 7);
+  let notesStr = "Notas: ";
+  (cash.inputs || []).forEach(i => {
+    const val = parseFloat(i.denomination) || 0;
+    const qty = parseInt(i.val) || 0;
+    if (qty > 0 && [500, 200, 100, 50, 20, 10, 5].includes(val)) {
+      notesStr += `${qty}x${val}€ | `;
+    }
+  });
+  if (notesStr === "Notas: ") notesStr += "Nenhuma nota declarada.";
+  else notesStr = notesStr.slice(0, -3);
+  addLine(notesStr, 10, [0, 0, 0], 6);
+
+  let coinsStr = "Moedas: ";
+  (cash.inputs || []).forEach(i => {
+    const val = parseFloat(i.denomination) || 0;
+    const qty = parseInt(i.val) || 0;
+    if (qty > 0 && [2, 1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01].includes(val)) {
+      coinsStr += `${qty}x${val}€ | `;
+    }
+  });
+  if (coinsStr === "Moedas: ") coinsStr += "Nenhuma moeda declarada.";
+  else coinsStr = coinsStr.slice(0, -3);
+  addLine(coinsStr, 10, [0, 0, 0], 8);
+
+  if (cash.vales && cash.vales.length > 0) {
+    y += 2;
+    addLine('Detalhamento de Vales / Vouchers:', 13, [0, 38, 58], 7);
+    cash.vales.forEach(v => {
+      let statusStr = v.status || 'Pendente';
+      if (v.status === 'Pago') {
+        statusStr = `PAGO por ${v.paidBy} em ${v.paidTime}`;
+      }
+      addLine(` - ${v.val}€ | Just: ${v.just} | Dept: ${v.dept} | Resp: ${v.resp} | Data: ${v.date} | Estado: ${statusStr}`, 9, [0, 0, 0], 5);
+    });
+  }
+
+  if (cash.paidouts && cash.paidouts.length > 0) {
+    y += 4;
+    addLine('Detalhamento de Paid-outs:', 13, [0, 38, 58], 7);
+    cash.paidouts.forEach(p => {
+      const v = parseFloat(p.val) || 0;
+      const reimbursed = parseFloat(p.reimbursed) || 0;
+      const pending = parseFloat(p.pending) || 0;
+      let reimbStr = p.status || 'Pendente';
+      if (p.status === 'Reembolsado') {
+        reimbStr = `REEMBOLSADO INTEGRALMENTE por ${p.reimbursedBy} em ${p.reimbursedTime}`;
+      } else if (p.status === 'Parcial') {
+        reimbStr = `REEMBOLSADO PARCIALMENTE: Recebido ${reimbursed.toFixed(2)}€, Falta Reembolsar ${pending.toFixed(2)}€ (por ${p.reimbursedBy} em ${p.reimbursedTime})`;
+      }
+      addLine(` - Original: ${v.toFixed(2)}€ | Just: ${p.just} | Quarto: ${p.room} | Resp: ${p.resp} | Data: ${p.date} | Estado: ${reimbStr}`, 9, [0, 0, 0], 5);
+    });
+  }
+
+  y += 10;
+  addLine('Assinatura do Rececionista:', 11, [20, 20, 20], 12);
+  doc.setDrawColor(198, 166, 103); doc.setLineWidth(1); doc.line(10, y, 100, y); y += 6;
+
+  const safe = sanitizeFileName(`Caixa_${map[tAtual] || tAtual}_${record.data}_${rAtual}`) || 'ComprovativoCaixa';
+  doc.save(`${safe}_Arquivo.pdf`);
 }
 
 document.addEventListener('click', e => {
@@ -399,6 +1035,9 @@ document.addEventListener('input', e => {
   }
   if (e.target.matches('.cash-input')) {
     if (typeof calculateTotalCaixa === 'function') calculateTotalCaixa();
+  }
+  if (e.target.matches('.dyn-just')) {
+    autoResizeTextArea(e.target);
   }
 });
 
@@ -661,4 +1300,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   HeaderController.init();
   await loadDynamicChecklists();
   if (typeof loadProgress === 'function') loadProgress();
+  if (typeof renderHistoryTab === 'function') renderHistoryTab();
 });

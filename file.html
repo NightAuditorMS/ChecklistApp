@@ -49,6 +49,7 @@
     <nav class="tabs-nav">
       <button class="tab-btn active" data-tab="tab-checklist">Checklists</button>
       <button class="tab-btn" data-tab="tab-contagem">Contagem de Caixa</button>
+      <button class="tab-btn" data-tab="tab-historico">Histórico</button>
     </nav>
 
     <!-- ABA 1: CHECKLIST -->
@@ -293,6 +294,60 @@
       </div>
     </div> <!-- Fim tab-contagem -->
 
+    <!-- ABA 3: HISTÓRICO DE DOCUMENTOS -->
+    <div id="tab-historico" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2 style="margin:0;">Histórico de Documentos</h2>
+            <p class="section-note" style="margin:5px 0 0 0;">Base de Dados e Histórico de Fechos de Turno</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="logout-button-styled" onclick="exportDatabase()" style="font-size:12px;">Exportar BD (JSON)</button>
+            <button class="logout-button-styled" onclick="document.getElementById('importFile').click()" style="font-size:12px;">Importar BD (JSON)</button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDatabase(this)">
+            <button class="logout-button-styled" onclick="clearDatabase()" style="font-size:12px; border-color:#ff5757; color:#ff5757; background:rgba(255,87,87,0.08);">Limpar Histórico</button>
+          </div>
+        </div>
+
+        <div class="history-layout">
+          <!-- Coluna 1: Checklists -->
+          <div class="history-col">
+            <h3>Checklists</h3>
+            <div id="historyChecklistList" class="history-list-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Coluna 2: Contagens de Caixa -->
+          <div class="history-col">
+            <h3>Contagens de Caixa</h3>
+            <div id="historyCaixaList" class="history-list-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Coluna 3: Logs de Documentos (Split) -->
+          <div class="history-col-split">
+            <!-- Paidouts Square -->
+            <div class="history-sub-box">
+              <h3>Histórico de Paid-outs</h3>
+              <div id="historyPaidoutsList" class="history-list-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+            <!-- Vales Square -->
+            <div class="history-sub-box">
+              <h3>Histórico de Vales</h3>
+              <div id="historyValesList" class="history-list-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- Fim tab-historico -->
+
   </main>
 
   <!-- External Libraries -->
@@ -305,5 +360,26 @@
   <script src="./tarefas.js"></script>
   <script src="./checklist.js"></script>
   <script src="./storage.js"></script>
+
+  <!-- Modal de Reembolso de Paid-out -->
+  <div id="reimbursementModal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+      <h3 style="color:var(--gold); margin-top:0;">Reembolso de Paid-out</h3>
+      <p id="reimbursementModalText">Deseja marcar este paid-out como totalmente ou parcialmente reembolsado?</p>
+      <div id="modalStep1" class="modal-actions">
+        <button class="modal-btn success-btn" onclick="handleReimburseOption('fully')">Totalmente</button>
+        <button class="modal-btn gold-btn" onclick="handleReimburseOption('partially')">Parcialmente</button>
+        <button class="modal-btn secondary-btn" onclick="closeReimbursementModal()">Cancelar</button>
+      </div>
+      <div id="modalStep2" style="display:none; margin-top:15px;">
+        <label for="reimburseAmountInput" style="display:block; margin-bottom:8px;"><strong>Valor Reembolsado (€):</strong></label>
+        <input id="reimburseAmountInput" type="number" step="0.01" min="0" class="cash-input" style="width:100%; text-align:right; margin-bottom:15px;">
+        <div class="modal-actions">
+          <button class="modal-btn success-btn" onclick="confirmPartialReimbursement()">Confirmar</button>
+          <button class="modal-btn secondary-btn" onclick="showModalStep1()">Voltar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
