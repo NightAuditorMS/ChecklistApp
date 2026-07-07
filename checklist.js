@@ -647,18 +647,42 @@ function importDatabase(input) {
   input.value = ''; // Reset file input
 }
 
-function clearDatabase() {
-  if (confirm('Tem a certeza que deseja limpar TODO o histórico de documentos? Esta ação não pode ser desfeita.')) {
-    localStorage.removeItem('night_audit_db_v1');
-    renderHistoryTab();
-    alert('Histórico limpo.');
-  }
+// History tab columns rendering engine
+function applyHistoryFilters() {
+  renderHistoryTab();
 }
 
-// History tab columns rendering engine
 function renderHistoryTab() {
   const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
   
+  // Read filter values
+  const filterDate = document.getElementById('histFilterDate')?.value || '';
+  const filterAuditor = document.getElementById('histFilterAuditor')?.value?.toLowerCase()?.trim() || '';
+  const filterShift = document.getElementById('histFilterShift')?.value || '';
+  const sortOption = document.getElementById('histSortOptions')?.value || 'newest';
+  
+  // Apply filtering
+  let filteredDb = db.filter(record => {
+    if (filterDate && record.data !== filterDate) return false;
+    if (filterShift && record.turno !== filterShift) return false;
+    if (filterAuditor && !record.auditor?.toLowerCase()?.includes(filterAuditor)) return false;
+    return true;
+  });
+  
+  // Apply sorting
+  filteredDb.sort((a, b) => {
+    if (sortOption === 'newest') {
+      return (b.timestamp || 0) - (a.timestamp || 0);
+    } else if (sortOption === 'oldest') {
+      return (a.timestamp || 0) - (b.timestamp || 0);
+    } else if (sortOption === 'az') {
+      return (a.auditor || '').localeCompare(b.auditor || '');
+    } else if (sortOption === 'za') {
+      return (b.auditor || '').localeCompare(a.auditor || '');
+    }
+    return 0;
+  });
+
   const chContainer = document.getElementById('historyChecklistList');
   const cxContainer = document.getElementById('historyCaixaList');
   const poContainer = document.getElementById('historyPaidoutsList');
@@ -669,8 +693,8 @@ function renderHistoryTab() {
   poContainer.innerHTML = '';
   vaContainer.innerHTML = '';
   
-  if (db.length === 0) {
-    const emptyMsg = '<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Sem registos.</div>';
+  if (filteredDb.length === 0) {
+    const emptyMsg = '<div style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">Sem registos correspondentes.</div>';
     chContainer.innerHTML = emptyMsg;
     cxContainer.innerHTML = emptyMsg;
     poContainer.innerHTML = emptyMsg;
@@ -683,7 +707,7 @@ function renderHistoryTab() {
   let allPaidouts = [];
   let allVales = [];
 
-  db.forEach((record, recordIndex) => {
+  filteredDb.forEach((record) => {
     // Column 1: Checklist Card
     const chCard = document.createElement('div');
     chCard.className = 'history-card';
@@ -700,7 +724,7 @@ function renderHistoryTab() {
         <strong>Obs:</strong> ${record.obsFinais ? record.obsFinais.substring(0, 50) + (record.obsFinais.length > 50 ? '...' : '') : 'N/A'}
       </div>
       <div class="history-card-actions">
-        <button class="history-pdf-btn" onclick="regenerateChecklistPDF(${recordIndex})">Descarregar PDF</button>
+        <button class="history-pdf-btn" onclick="regenerateChecklistPDF('${record.id}')">Descarregar PDF</button>
       </div>
     `;
     chContainer.appendChild(chCard);
@@ -724,7 +748,7 @@ function renderHistoryTab() {
           <strong>Diferença:</strong> ${dif < -0.005 ? `<span style="color:#ff5757; font-weight:bold;">${dif.toFixed(2)}€</span>` : '-'}
         </div>
         <div class="history-card-actions">
-          <button class="history-pdf-btn" onclick="regenerateCaixaPDF(${recordIndex})">Descarregar PDF</button>
+          <button class="history-pdf-btn" onclick="regenerateCaixaPDF('${record.id}')">Descarregar PDF</button>
         </div>
       `;
       cxContainer.appendChild(cxCard);
@@ -825,9 +849,9 @@ function renderHistoryTab() {
   }
 }
 
-function regenerateChecklistPDF(recordIndex) {
+function regenerateChecklistPDF(recordId) {
   const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
-  const record = db[recordIndex];
+  const record = db.find(r => r.id === recordId);
   if (!record) return;
 
   if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return; }
@@ -900,9 +924,9 @@ function regenerateChecklistPDF(recordIndex) {
   doc.save(`${safe}_Arquivo.pdf`);
 }
 
-function regenerateCaixaPDF(recordIndex) {
+function regenerateCaixaPDF(recordId) {
   const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
-  const record = db[recordIndex];
+  const record = db.find(r => r.id === recordId);
   if (!record || !record.cash) return;
 
   if (!window.jspdf?.jsPDF) { alert('Biblioteca de PDF não carregada.'); return; }

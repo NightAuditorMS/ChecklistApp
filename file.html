@@ -306,7 +306,39 @@
             <button class="logout-button-styled" onclick="exportDatabase()" style="font-size:12px;">Exportar BD (JSON)</button>
             <button class="logout-button-styled" onclick="document.getElementById('importFile').click()" style="font-size:12px;">Importar BD (JSON)</button>
             <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDatabase(this)">
-            <button class="logout-button-styled" onclick="clearDatabase()" style="font-size:12px; border-color:#ff5757; color:#ff5757; background:rgba(255,87,87,0.08);">Limpar Histórico</button>
+          </div>
+        </div>
+
+        <!-- Filtros do Histórico -->
+        <div class="card" style="background: rgba(255,255,255,0.01); border-color: var(--border); margin-bottom: 20px; padding: 15px;">
+          <div class="meta-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+            <div>
+              <label for="histFilterDate"><strong>Filtrar por Data</strong></label>
+              <input type="date" id="histFilterDate" oninput="applyHistoryFilters()" style="margin-top:6px; margin-bottom:0; padding:8px; height: 38px;">
+            </div>
+            <div>
+              <label for="histFilterAuditor"><strong>Filtrar por Rececionista</strong></label>
+              <input type="text" id="histFilterAuditor" placeholder="Nome..." oninput="applyHistoryFilters()" style="margin-top:6px; margin-bottom:0; padding:8px; height: 38px;">
+            </div>
+            <div>
+              <label for="histFilterShift"><strong>Filtrar por Turno</strong></label>
+              <select id="histFilterShift" onchange="applyHistoryFilters()" style="margin-top:6px; margin-bottom:0; padding:8px; height: 38px;">
+                <option value="">Todos os Turnos</option>
+                <option value="noite">Night Audit</option>
+                <option value="manha">Manhã</option>
+                <option value="tarde">Tarde</option>
+                <option value="doorman">Doorman</option>
+              </select>
+            </div>
+            <div>
+              <label for="histSortOptions"><strong>Ordenar por</strong></label>
+              <select id="histSortOptions" onchange="applyHistoryFilters()" style="margin-top:6px; margin-bottom:0; padding:8px; height: 38px;">
+                <option value="newest">Mais recente (Newest)</option>
+                <option value="oldest">Mais antigo (Oldest)</option>
+                <option value="az">Rececionista (A-Z)</option>
+                <option value="za">Rececionista (Z-A)</option>
+              </select>
+            </div>
           </div>
         </div>
 
