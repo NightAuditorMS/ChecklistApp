@@ -426,6 +426,41 @@ window.tarefasData = {
           ]
         },
         {
+          "title": "Relatórios WhatsApp — NIGHT AUDIT REPORTS",
+          "items": [
+            {
+              "text": "Relatório 130. Previsão de ocupação",
+              "help": "Filtro Mensal : 30 Dias - Pequenos almoços e Definir extras.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 02.  Chegadas",
+              "help": "Chegadas para uma semana : Dia + 6 dias.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 04. Saídas",
+              "help": "Para uma semana: Dia + 6 dias.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 03. Residentes",
+              "help": "Para uma semana : Dia + 6 dias.",
+              "optional": false,
+              "sunday": false
+            },
+            {
+              "text": "Relatório 112 resultados financeiros do dia",
+              "help": "Enviar para o grupo WhatsApp: NIGHT AUDIT REPORTS.",
+              "optional": false,
+              "sunday": false
+            }
+          ]
+        },
+        {
           "title": "Relatórios da Auditoria Noturna — Envio por e-mail",
           "items": [
             {
