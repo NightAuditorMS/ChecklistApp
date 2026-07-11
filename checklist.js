@@ -240,7 +240,7 @@ async function finalizarTurno() {
       obsIniciais: $('#obsIniciais')?.value || '',
       obsFinais: $('#obsFinais')?.value || '',
       proto: proto || '',
-      checklistChecks: typeof getAllCheckboxes === 'function' ? getAllCheckboxes().map(cb => ({
+      checklistChecks: typeof getAllCheckboxes === 'function' ? getAllCheckboxes(activeWrapper).map(cb => ({
         label: cb.closest('.check-label')?.querySelector('.item-text')?.textContent?.replace(/\?/g, '')?.trim() || cb.closest('.check-label')?.textContent?.trim() || '',
         checked: cb.checked
       })) : [],

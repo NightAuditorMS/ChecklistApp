@@ -270,7 +270,7 @@ function loadProgress() {
 }
 
 // Bind custom event listener to cashTurnoAtual
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
   const cashTurno = document.getElementById('cashTurnoAtual');
   if (cashTurno) {
     cashTurno.addEventListener('change', (e) => {
@@ -293,4 +293,4 @@ document.addEventListener('DOMContentLoaded', () => {
       cashTurno.dataset.currentLoadedShift = newShift;
     });
   }
-});
+})();
