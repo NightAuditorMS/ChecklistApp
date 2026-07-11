@@ -135,11 +135,52 @@ function loadShiftCashDataApp(d, shift) {
   if (!d.shiftsCash) d.shiftsCash = {};
   
   if (!d.shiftsCash[shift]) {
-    if (d.cash && d.cash.meta && d.cash.meta.tAtual === shift) {
-      d.shiftsCash[shift] = JSON.parse(JSON.stringify(d.cash));
+    // 1. Try to find the most recently finalized shift's cash data in the database
+    let lastCompletedCash = null;
+    try {
+      const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+      if (db.length > 0 && db[0].cash) {
+        lastCompletedCash = JSON.parse(JSON.stringify(db[0].cash));
+      }
+    } catch(e) {}
+    
+    // 2. Try to find any existing shift in shiftsCash (Night, Afternoon, Morning)
+    if (!lastCompletedCash) {
+      const candidateShifts = ['noite', 'tarde', 'manha'];
+      for (const cs of candidateShifts) {
+        if (d.shiftsCash[cs] && d.shiftsCash[cs].inputs && d.shiftsCash[cs].inputs.length > 0) {
+          lastCompletedCash = JSON.parse(JSON.stringify(d.shiftsCash[cs]));
+          break;
+        }
+      }
+    }
+
+    if (!lastCompletedCash) {
+      const keys = Object.keys(d.shiftsCash);
+      for (const k of keys) {
+        if (d.shiftsCash[k] && d.shiftsCash[k].inputs && d.shiftsCash[k].inputs.length > 0) {
+          lastCompletedCash = JSON.parse(JSON.stringify(d.shiftsCash[k]));
+          break;
+        }
+      }
+    }
+
+    // 3. Fallback to active d.cash
+    if (!lastCompletedCash && d.cash && d.cash.inputs && d.cash.inputs.length > 0) {
+      lastCompletedCash = JSON.parse(JSON.stringify(d.cash));
+    }
+
+    if (lastCompletedCash) {
+      d.shiftsCash[shift] = lastCompletedCash;
+      d.shiftsCash[shift].meta = d.shiftsCash[shift].meta || {};
+      d.shiftsCash[shift].meta.tAtual = shift;
+      d.shiftsCash[shift].meta.tProx = '';
+      d.shiftsCash[shift].meta.rProx = '';
+      d.shiftsCash[shift].meta.recebido = '0';
     } else {
+      // Default empty if absolutely no previous data exists
       d.shiftsCash[shift] = {
-        inputs: Array(15).fill(null).map(() => ({val: '0'})),
+        inputs: Array(16).fill(null).map(() => ({val: '0'})),
         vales: [],
         paidouts: [],
         meta: {
