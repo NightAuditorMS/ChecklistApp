@@ -217,6 +217,9 @@ async function finalizarTurno() {
   }
   
   if (confirm('Checklist completa. Deseja finalizar o turno, gerar PDFs e reiniciar?')) {
+    // Force final progress save to make sure everything is in sync
+    if (typeof saveProgress === 'function') saveProgress();
+
     const auditor = $('#auditorNome')?.value?.trim() || 'Rececionista';
     const data = $('#auditorData')?.value?.trim() || new Date().toISOString().split('T')[0];
     
