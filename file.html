@@ -13,6 +13,13 @@
       <img src="./MythicSanaHotelLogoCor.png" alt="Sana Mythic Hotel" class="brand-logo-img">
       <h1>Portal Front Office</h1>
     </div>
+
+    <!-- Checklist Progress Badge -->
+    <div id="header-progress-badge" class="header-progress-badge" style="display: none;">
+      <span class="progress-badge-label">Progresso:</span>
+      <span id="header-progress-percent" class="progress-badge-value">0%</span>
+    </div>
+
     <div class="header-controls">
       <!-- Left Group: DateTime + Weather Forecast -->
       <div class="header-left-group">
@@ -41,6 +48,11 @@
       <!-- Compatibility fallbacks for JS logic -->
       <span id="greeting-text" style="display: none;"></span>
       <span id="header-date" style="display: none;"></span>
+    </div>
+
+    <!-- Checklist Progress Bar Container -->
+    <div id="checklist-progress-container" class="checklist-progress-container">
+      <div id="checklist-progress-bar" class="checklist-progress-bar"></div>
     </div>
   </header>
 

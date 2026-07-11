@@ -63,6 +63,10 @@ function switchTab(tabId) {
     const isStarted = $('#turnoSelecionado').value !== '' && $('#tela2').style.display === 'block';
     showScreen(isStarted ? 2 : 1);
   }
+  
+  if (typeof updateChecklistProgressBar === 'function') {
+    updateChecklistProgressBar();
+  }
 }
 
 async function confirmarTurno(isLoading = false) {
@@ -183,6 +187,10 @@ function resetTurno() {
   document.body.classList.remove('turno-noite', 'turno-manha', 'turno-tarde', 'turno-doorman');
   showScreen(1);
   updateAuditorInfo();
+  
+  if (typeof updateChecklistProgressBar === 'function') {
+    updateChecklistProgressBar();
+  }
 }
 
 async function finalizarTurno() {
@@ -1319,10 +1327,58 @@ const HeaderController = {
   }
 };
 
+function updateChecklistProgressBar() {
+  const turno = $('#turnoSelecionado')?.value;
+  const isTela2Visible = $('#tela2')?.style.display === 'block';
+  const isChecklistTab = $('.tab-btn[data-tab="tab-checklist"]')?.classList.contains('active');
+
+  const container = document.getElementById('checklist-progress-container');
+  const badge = document.getElementById('header-progress-badge');
+  const percentText = document.getElementById('header-progress-percent');
+
+  if (!turno || !isTela2Visible || !isChecklistTab) {
+    if (container) container.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+
+  const activeWrapper = document.getElementById(`checklist-${turno}`);
+  if (!activeWrapper) {
+    if (container) container.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+
+  const checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper);
+  const visibleCheckboxes = checkboxes.filter(cb => cb.offsetParent !== null);
+
+  const total = visibleCheckboxes.length;
+  const checked = visibleCheckboxes.filter(cb => cb.checked).length;
+  const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+  if (container) {
+    container.style.display = 'block';
+    const progressBar = document.getElementById('checklist-progress-bar');
+    if (progressBar) progressBar.style.width = `${percentage}%`;
+  }
+
+  if (badge) {
+    badge.style.display = 'flex';
+    if (percentText) percentText.innerText = `${percentage}%`;
+  }
+
+  const resumo = document.getElementById('turnoResumoTexto');
+  if (resumo) {
+    const map = { noite: 'Night Audit', manha: 'Manhã', tarde: 'Tarde', doorman: 'Doorman' };
+    resumo.innerHTML = `${map[turno] || turno} <span class="resumo-progresso">(${percentage}% concluído · ${checked}/${total} tarefas)</span>`;
+  }
+}
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', async () => {
   HeaderController.init();
   await loadDynamicChecklists();
   if (typeof loadProgress === 'function') loadProgress();
   if (typeof renderHistoryTab === 'function') renderHistoryTab();
+  updateChecklistProgressBar();
 });

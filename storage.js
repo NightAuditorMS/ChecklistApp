@@ -60,6 +60,10 @@ function saveProgress() {
   try { 
     localStorage.setItem(storageKey, JSON.stringify(d)); 
   } catch(e) {}
+  
+  if (typeof updateChecklistProgressBar === 'function') {
+    updateChecklistProgressBar();
+  }
 }
 
 function loadProgress() {
@@ -154,4 +158,8 @@ function loadProgress() {
   if (typeof updateAllSectionToggles === 'function') updateAllSectionToggles();
   const tSel = document.getElementById('turnoSelecionado');
   if (typeof aplicarExclusivos === 'function') aplicarExclusivos(tSel ? tSel.value : '');
+  
+  if (typeof updateChecklistProgressBar === 'function') {
+    updateChecklistProgressBar();
+  }
 }
