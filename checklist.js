@@ -141,7 +141,7 @@ function getSectionCBs(sec) { return $$('li.check-item input[type="checkbox"]', 
 function updateSectionToggle(sec) {
   const master = $('.section-toggle-all', sec);
   if (!master) return;
-  const items = getSectionCBs(sec).filter(cb => cb.offsetParent !== null);
+  const items = getSectionCBs(sec);
   const total = items.length;
   const checked = items.filter(cb => cb.checked).length;
   master.checked = total > 0 && checked === total;
@@ -198,9 +198,16 @@ async function finalizarTurno() {
   const proto = $('#proto')?.value?.trim();
   if (turno === 'noite' && !proto) { alert('O protocolo MySana é obrigatório.'); return; }
   clearWarnings();
-  const cbs = getAllCheckboxes($('#tela2'));
+  const activeWrapper = $(`#checklist-${turno}`);
+  const cbs = getAllCheckboxes(activeWrapper);
   for (const cb of cbs) {
-    if (!cb.checked && !isOptional(cb) && cb.offsetParent !== null) {
+    if (!cb.checked && !isOptional(cb)) {
+      const phaseContent = cb.closest('.phase-content');
+      if (phaseContent && phaseContent.style.display === 'none') {
+        const btn = document.querySelector(`.phase-btn[data-target="${phaseContent.id}"]`);
+        if (btn) togglePhase(btn);
+      }
+      
       const li = cb.closest('.check-item');
       li.classList.add('unchecked-warning');
       li.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1350,10 +1357,8 @@ function updateChecklistProgressBar() {
   }
 
   const checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper);
-  const visibleCheckboxes = checkboxes.filter(cb => cb.offsetParent !== null);
-
-  const total = visibleCheckboxes.length;
-  const checked = visibleCheckboxes.filter(cb => cb.checked).length;
+  const total = checkboxes.length;
+  const checked = checkboxes.filter(cb => cb.checked).length;
   const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
 
   if (container) {
