@@ -168,7 +168,7 @@ function resetTurno() {
     const saved = localStorage.getItem(storageKey); // Requires storageKey from storage.js
     if (saved) {
       const d = JSON.parse(saved);
-      localStorage.setItem(storageKey, JSON.stringify({ cash: d.cash }));
+      localStorage.setItem(storageKey, JSON.stringify({ cash: d.cash, shiftsCash: d.shiftsCash }));
     }
   } catch (e) { }
 
@@ -303,20 +303,57 @@ async function finalizarTurno() {
       const saved = localStorage.getItem(storageKey); // Requires storageKey from storage.js
       if (saved) {
         const d = JSON.parse(saved);
+        
+        const completedShift = d.turno || (d.cash && d.cash.meta && d.cash.meta.tAtual) || '';
+        
+        // Save current completed shift's cash state to shiftsCash
+        if (completedShift && d.cash) {
+          if (!d.shiftsCash) d.shiftsCash = {};
+          d.shiftsCash[completedShift] = JSON.parse(JSON.stringify(d.cash));
+        }
+
+        let nextShift = '';
+        let nextRec = '';
         if (d.cash && d.cash.meta) {
-          d.cash.meta.tAtual = d.cash.meta.tProx || '';
-          d.cash.meta.rAtual = d.cash.meta.rProx || '';
+          nextShift = d.cash.meta.tProx || '';
+          nextRec = d.cash.meta.rProx || '';
+        }
+
+        // Initialize or load the next shift's cash data
+        if (nextShift) {
+          if (!d.shiftsCash) d.shiftsCash = {};
+          if (d.shiftsCash[nextShift]) {
+            d.cash = JSON.parse(JSON.stringify(d.shiftsCash[nextShift]));
+          } else {
+            d.cash = {
+              inputs: Array(15).fill(null).map(() => ({ val: '0' })),
+              vales: [],
+              paidouts: [],
+              meta: {
+                tAtual: nextShift,
+                rAtual: nextRec,
+                tProx: '',
+                rProx: '',
+                recebido: '0.00'
+              }
+            };
+          }
+          
+          // Ensure meta settings are set for the transition
+          d.cash.meta.tAtual = nextShift;
+          d.cash.meta.rAtual = nextRec;
           d.cash.meta.tProx = '';
           d.cash.meta.rProx = '';
-          d.cash.meta.recebido = '0';
-          d.cash.vales = [];
-          d.cash.paidouts = [];
-          if(d.cash.inputs) {
-            d.cash.inputs = d.cash.inputs.map(() => ({val: '0'}));
-          }
+          d.cash.meta.recebido = '0.00';
+          
+          // Keep in sync in shiftsCash map
+          d.shiftsCash[nextShift] = d.cash;
+        } else {
+          d.cash = null;
         }
-        d.turno = d.cash?.meta?.tAtual || '';
-        d.auditorNome = d.cash?.meta?.rAtual || '';
+
+        d.turno = nextShift;
+        d.auditorNome = nextRec;
         d.auditorData = '';
         d.obsIniciais = ''; d.proto = ''; d.obsFinais = '';
         d.checks = []; d.tela2Visible = false; d.openPhases = [];
@@ -1059,6 +1096,7 @@ document.addEventListener('click', e => {
 });
 
 document.addEventListener('change', e => {
+  if (e.target.id === 'cashTurnoAtual') return; // Handled separately
   if (e.target.matches('.section-toggle-all')) return handleSectionToggle(e.target);
   if (e.target.matches('#tela2 input[type="checkbox"]')) {
     const sec = e.target.closest('.phase-content, .checklist-continua');
@@ -1356,9 +1394,11 @@ function updateChecklistProgressBar() {
     return;
   }
 
-  // Filter out optional items from calculations
-  const checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper)
-                       .filter(cb => !isOptional(cb));
+  // Filter out optional items from calculations only for night shift (noite)
+  let checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper);
+  if (turno === 'noite') {
+    checkboxes = checkboxes.filter(cb => !isOptional(cb));
+  }
   const total = checkboxes.length;
   const checked = checkboxes.filter(cb => cb.checked).length;
   const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
