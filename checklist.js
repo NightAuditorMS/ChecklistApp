@@ -1356,7 +1356,9 @@ function updateChecklistProgressBar() {
     return;
   }
 
-  const checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper);
+  // Filter out optional items from calculations
+  const checkboxes = $$('input[type="checkbox"]:not(.section-toggle-all)', activeWrapper)
+                       .filter(cb => !isOptional(cb));
   const total = checkboxes.length;
   const checked = checkboxes.filter(cb => cb.checked).length;
   const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
