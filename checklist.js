@@ -103,7 +103,10 @@ async function confirmarTurno(isLoading = false) {
   
   if (!isLoading) {
     const cashTurno = $('#cashTurnoAtual');
-    if (cashTurno) cashTurno.value = turno;
+    if (cashTurno) {
+      cashTurno.value = turno;
+      cashTurno.dispatchEvent(new Event('change'));
+    }
 
     const cashRececionista = $('#cashRececionistaAtual');
     if (cashRececionista) cashRececionista.value = nome;
@@ -245,7 +248,7 @@ async function finalizarTurno() {
         checked: cb.checked
       })) : [],
       cash: turno !== 'doorman' ? {
-        inputs: Array.from(document.querySelectorAll('.cash-input:not(.dyn-val)')).map(i => ({ val: i.value, denomination: i.dataset.value })),
+        inputs: Array.from(document.querySelectorAll('#tableNotas .cash-input, #tableMoedas .cash-input')).map(i => ({ val: i.value, denomination: i.dataset.value })),
         totalNotas: parseFloat(document.getElementById('totalNotasSum')?.innerText) || 0,
         totalMoedas: parseFloat(document.getElementById('totalMoedasSum')?.innerText) || 0,
         totalVales: parseFloat(document.getElementById('totalValesSum')?.innerText) || 0,
@@ -328,18 +331,37 @@ async function finalizarTurno() {
           if (d.shiftsCash[nextShift]) {
             d.cash = JSON.parse(JSON.stringify(d.shiftsCash[nextShift]));
           } else {
-            d.cash = {
-              inputs: Array(15).fill(null).map(() => ({ val: '0' })),
-              vales: [],
-              paidouts: [],
-              meta: {
-                tAtual: nextShift,
-                rAtual: nextRec,
-                tProx: '',
-                rProx: '',
-                recebido: '0.00'
-              }
-            };
+            const currentCash = d.cash ? JSON.parse(JSON.stringify(d.cash)) : null;
+            if (currentCash) {
+              const nextInputs = currentCash.inputs || Array(15).fill(null).map(() => ({ val: '0' }));
+              const nextVales = (currentCash.vales || []).filter(v => v.status !== 'Pago');
+              const nextPaidouts = (currentCash.paidouts || []).filter(p => p.status !== 'Reembolsado');
+              d.cash = {
+                inputs: nextInputs,
+                vales: nextVales,
+                paidouts: nextPaidouts,
+                meta: {
+                  tAtual: nextShift,
+                  rAtual: nextRec,
+                  tProx: '',
+                  rProx: '',
+                  recebido: '0.00'
+                }
+              };
+            } else {
+              d.cash = {
+                inputs: Array(15).fill(null).map(() => ({ val: '0' })),
+                vales: [],
+                paidouts: [],
+                meta: {
+                  tAtual: nextShift,
+                  rAtual: nextRec,
+                  tProx: '',
+                  rProx: '',
+                  recebido: '0.00'
+                }
+              };
+            }
           }
           
           // Ensure meta settings are set for the transition

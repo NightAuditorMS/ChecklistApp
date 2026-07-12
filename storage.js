@@ -4,7 +4,7 @@ function saveProgress() {
   const currentShift = document.querySelector('#cashTurnoAtual')?.value || '';
   
   const cashData = {
-    inputs: Array.from(document.querySelectorAll('.cash-input:not(.dyn-val)')).map(i => ({val: i.value})),
+    inputs: Array.from(document.querySelectorAll('#tableNotas .cash-input, #tableMoedas .cash-input')).map(i => ({val: i.value})),
     vales: Array.from(document.querySelectorAll('#bodyVales tr')).map(tr => ({
       val: tr.querySelector('.dyn-val').value, 
       just: tr.querySelector('.dyn-just').value, 
@@ -86,7 +86,7 @@ function saveProgressForShift(shift) {
   if (!shift) return;
   
   const cashData = {
-    inputs: Array.from(document.querySelectorAll('.cash-input:not(.dyn-val)')).map(i => ({val: i.value})),
+    inputs: Array.from(document.querySelectorAll('#tableNotas .cash-input, #tableMoedas .cash-input')).map(i => ({val: i.value})),
     vales: Array.from(document.querySelectorAll('#bodyVales tr')).map(tr => ({
       val: tr.querySelector('.dyn-val').value, 
       just: tr.querySelector('.dyn-just').value, 
@@ -131,56 +131,84 @@ function saveProgressForShift(shift) {
   } catch(e) {}
 }
 
+function getPreviousShiftCashData(d, currentShift) {
+  const order = ['noite', 'manha', 'tarde', 'doorman'];
+  const currentIndex = order.indexOf(currentShift);
+  
+  const candidates = [];
+  if (currentIndex !== -1) {
+    for (let i = 1; i < order.length; i++) {
+      const idx = (currentIndex - i + order.length) % order.length;
+      const shiftName = order[idx];
+      if (shiftName !== 'doorman') {
+        candidates.push(shiftName);
+      }
+    }
+  } else {
+    candidates.push('tarde', 'manha', 'noite');
+  }
+  
+  // 1. First, search in current session's shiftsCash for the candidate shifts
+  for (const cs of candidates) {
+    if (d.shiftsCash && d.shiftsCash[cs] && d.shiftsCash[cs].inputs && d.shiftsCash[cs].inputs.length > 0) {
+      return JSON.parse(JSON.stringify(d.shiftsCash[cs]));
+    }
+  }
+  
+  // 2. If not found in current session, check the database (most recently finalized shift)
+  try {
+    const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+    for (const record of db) {
+      if (record.cash && record.cash.inputs && record.cash.inputs.length > 0) {
+        return JSON.parse(JSON.stringify(record.cash));
+      }
+    }
+  } catch (e) {}
+  
+  // 3. Fallback to active d.cash
+  if (d.cash && d.cash.inputs && d.cash.inputs.length > 0) {
+    return JSON.parse(JSON.stringify(d.cash));
+  }
+  
+  return null;
+}
+
 function loadShiftCashDataApp(d, shift) {
   if (!d.shiftsCash) d.shiftsCash = {};
   
-  if (!d.shiftsCash[shift]) {
-    // 1. Try to find the most recently finalized shift's cash data in the database
-    let lastCompletedCash = null;
-    try {
-      const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
-      if (db.length > 0 && db[0].cash) {
-        lastCompletedCash = JSON.parse(JSON.stringify(db[0].cash));
-      }
-    } catch(e) {}
+  const isEmptyOrAllZeros = (cashObj) => {
+    if (!cashObj || !cashObj.inputs || cashObj.inputs.length === 0) return true;
+    const hasNonZeroInput = cashObj.inputs.some(inp => parseFloat(inp.val) > 0);
+    const hasVales = cashObj.vales && cashObj.vales.length > 0;
+    const hasPaidouts = cashObj.paidouts && cashObj.paidouts.length > 0;
+    return !hasNonZeroInput && !hasVales && !hasPaidouts;
+  };
+
+  if (!d.shiftsCash[shift] || isEmptyOrAllZeros(d.shiftsCash[shift])) {
+    let lastCompletedCash = getPreviousShiftCashData(d, shift);
     
-    // 2. Try to find any existing shift in shiftsCash (Night, Afternoon, Morning)
-    if (!lastCompletedCash) {
-      const candidateShifts = ['noite', 'tarde', 'manha'];
-      for (const cs of candidateShifts) {
-        if (d.shiftsCash[cs] && d.shiftsCash[cs].inputs && d.shiftsCash[cs].inputs.length > 0) {
-          lastCompletedCash = JSON.parse(JSON.stringify(d.shiftsCash[cs]));
-          break;
-        }
-      }
-    }
-
-    if (!lastCompletedCash) {
-      const keys = Object.keys(d.shiftsCash);
-      for (const k of keys) {
-        if (d.shiftsCash[k] && d.shiftsCash[k].inputs && d.shiftsCash[k].inputs.length > 0) {
-          lastCompletedCash = JSON.parse(JSON.stringify(d.shiftsCash[k]));
-          break;
-        }
-      }
-    }
-
-    // 3. Fallback to active d.cash
-    if (!lastCompletedCash && d.cash && d.cash.inputs && d.cash.inputs.length > 0) {
-      lastCompletedCash = JSON.parse(JSON.stringify(d.cash));
-    }
-
     if (lastCompletedCash) {
-      d.shiftsCash[shift] = lastCompletedCash;
-      d.shiftsCash[shift].meta = d.shiftsCash[shift].meta || {};
-      d.shiftsCash[shift].meta.tAtual = shift;
-      d.shiftsCash[shift].meta.tProx = '';
-      d.shiftsCash[shift].meta.rProx = '';
-      d.shiftsCash[shift].meta.recebido = '0';
+      // Filter out paid vales and reimbursed paidouts
+      const nextInputs = lastCompletedCash.inputs || Array(15).fill(null).map(() => ({ val: '0' }));
+      const nextVales = (lastCompletedCash.vales || []).filter(v => v.status !== 'Pago');
+      const nextPaidouts = (lastCompletedCash.paidouts || []).filter(p => p.status !== 'Reembolsado');
+      
+      d.shiftsCash[shift] = {
+        inputs: nextInputs,
+        vales: nextVales,
+        paidouts: nextPaidouts,
+        meta: {
+          tAtual: shift,
+          rAtual: d.shiftsCash[shift]?.meta?.rAtual || '',
+          tProx: '',
+          rProx: '',
+          recebido: '0'
+        }
+      };
     } else {
       // Default empty if absolutely no previous data exists
       d.shiftsCash[shift] = {
-        inputs: Array(16).fill(null).map(() => ({val: '0'})),
+        inputs: Array(15).fill(null).map(() => ({val: '0'})),
         vales: [],
         paidouts: [],
         meta: {
@@ -207,7 +235,7 @@ function loadShiftCashDataApp(d, shift) {
   setVal('cashRececionistaProximo', cash.meta.rProx);
   setVal('montanteRecebidoDia', cash.meta.recebido || '0');
   
-  const inputs = document.querySelectorAll('.cash-input:not(.dyn-val)');
+  const inputs = document.querySelectorAll('#tableNotas .cash-input, #tableMoedas .cash-input');
   inputs.forEach((input, i) => {
     input.value = (cash.inputs && cash.inputs[i] && cash.inputs[i].val != null) ? cash.inputs[i].val : '0';
   });
