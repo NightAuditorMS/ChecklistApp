@@ -132,6 +132,17 @@ function saveProgressForShift(shift) {
 }
 
 function getPreviousShiftCashData(d, currentShift) {
+  // 1. First, check the database (most recently finalized shift)
+  try {
+    const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
+    for (const record of db) {
+      if (record.cash && record.cash.inputs && record.cash.inputs.length > 0) {
+        return JSON.parse(JSON.stringify(record.cash));
+      }
+    }
+  } catch (e) {}
+
+  // 2. If not found in database, check current session's shiftsCash for the candidate shifts
   const order = ['noite', 'manha', 'tarde', 'doorman'];
   const currentIndex = order.indexOf(currentShift);
   
@@ -148,22 +159,11 @@ function getPreviousShiftCashData(d, currentShift) {
     candidates.push('tarde', 'manha', 'noite');
   }
   
-  // 1. First, search in current session's shiftsCash for the candidate shifts
   for (const cs of candidates) {
     if (d.shiftsCash && d.shiftsCash[cs] && d.shiftsCash[cs].inputs && d.shiftsCash[cs].inputs.length > 0) {
       return JSON.parse(JSON.stringify(d.shiftsCash[cs]));
     }
   }
-  
-  // 2. If not found in current session, check the database (most recently finalized shift)
-  try {
-    const db = JSON.parse(localStorage.getItem('night_audit_db_v1') || '[]');
-    for (const record of db) {
-      if (record.cash && record.cash.inputs && record.cash.inputs.length > 0) {
-        return JSON.parse(JSON.stringify(record.cash));
-      }
-    }
-  } catch (e) {}
   
   // 3. Fallback to active d.cash
   if (d.cash && d.cash.inputs && d.cash.inputs.length > 0) {
