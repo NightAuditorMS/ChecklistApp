@@ -141,7 +141,7 @@
             {
               "text": "Talões de Cancelamentos agrafados e justificados.",
               "help": "Todo cancelamento precisa estar acompanhado do talão cancelado, a nota de crédito e o novo talão emitido, que devem ser digitalizados e adicionados ao documento Fecho Cx para envio ao MySana.",
-              "optional": false,
+              "optional": true,
               "sunday": false
             },
             {
