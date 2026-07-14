@@ -260,21 +260,43 @@
 
         <div class="card">
           <h3>Vales (Vouchers)</h3>
-          <table class="dynamic-table" id="tableVales" style="font-size: 0.9em;">
-            <thead><tr><th>Valor (€)</th><th>Justificação</th><th>Departamento</th><th>Responsável</th><th>Data</th><th>Ações</th></tr></thead>
-            <tbody id="bodyVales"></tbody>
-            <tfoot><tr><td style="text-align:right"><strong>Total Vales:</strong></td><td colspan="2" id="totalValesSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
-          </table>
+          <div style="overflow-x: auto;">
+            <table class="dynamic-table" id="tableVales" style="font-size: 0.9em; table-layout: fixed; width: 100%; min-width: 800px;">
+              <thead>
+                <tr>
+                  <th style="width: 90px;">Valor (€)</th>
+                  <th>Justificação</th>
+                  <th style="width: 140px;">Departamento</th>
+                  <th style="width: 140px;">Responsável</th>
+                  <th style="width: 125px;">Data</th>
+                  <th style="width: 100px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="bodyVales"></tbody>
+              <tfoot><tr><td style="text-align:right"><strong>Total Vales:</strong></td><td colspan="5" id="totalValesSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
+            </table>
+          </div>
           <button class="secondary-btn" style="width:auto; margin-top:10px;" onclick="addRow('bodyVales')">+ Adicionar Vale</button>
         </div>
 
         <div class="card">
           <h3>Paid-outs</h3>
-          <table class="dynamic-table" id="tablePaidouts" style="font-size: 0.9em;">
-            <thead><tr><th>Valor (€)</th><th>Justificação</th><th>Quarto</th><th>Responsável</th><th>Data</th><th>Ações</th></tr></thead>
-            <tbody id="bodyPaidouts"></tbody>
-            <tfoot><tr><td style="text-align:right"><strong>Total Paid-outs:</strong></td><td colspan="2" id="totalPaidoutsSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
-          </table>
+          <div style="overflow-x: auto;">
+            <table class="dynamic-table" id="tablePaidouts" style="font-size: 0.9em; table-layout: fixed; width: 100%; min-width: 800px;">
+              <thead>
+                <tr>
+                  <th style="width: 90px;">Valor (€)</th>
+                  <th>Justificação</th>
+                  <th style="width: 140px;">Quarto</th>
+                  <th style="width: 140px;">Responsável</th>
+                  <th style="width: 125px;">Data</th>
+                  <th style="width: 100px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="bodyPaidouts"></tbody>
+              <tfoot><tr><td style="text-align:right"><strong>Total Paid-outs:</strong></td><td colspan="5" id="totalPaidoutsSum" style="font-weight:bold; color:var(--gold);">0.00€</td></tr></tfoot>
+            </table>
+          </div>
           <button class="secondary-btn" style="width:auto; margin-top:10px;" onclick="addRow('bodyPaidouts')">+ Adicionar Paid-out</button>
         </div>
 

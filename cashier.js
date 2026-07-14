@@ -308,7 +308,7 @@ function toggleValePaidState(btn) {
 function calculateTotalCaixa() {
   let totalNotas = 0, totalMoedas = 0, totalVales = 0, totalPaidouts = 0;
 
-  const getTableSum = (selector, isDynamic = false, isPaidout = false) => {
+  const getTableSum = (selector, isDynamic = false, isPaidout = false, isVale = false) => {
     return Array.from(document.querySelectorAll(selector)).reduce((acc, input) => {
       const val = parseFloat(input.value) || 0;
       if (isDynamic) {
@@ -316,6 +316,11 @@ function calculateTotalCaixa() {
           const tr = input.closest('tr');
           const pending = tr && tr.dataset.pending !== undefined ? parseFloat(tr.dataset.pending) : val;
           return acc + pending;
+        }
+        if (isVale) {
+          const tr = input.closest('tr');
+          const isPago = tr && tr.dataset.status === 'Pago';
+          return acc + (isPago ? 0 : val);
         }
         return acc + val;
       }
@@ -330,7 +335,7 @@ function calculateTotalCaixa() {
 
   totalNotas = getTableSum('#tableNotas tbody .cash-input');
   totalMoedas = getTableSum('#tableMoedas tbody .cash-input');
-  totalVales = getTableSum('#bodyVales .dyn-val', true);
+  totalVales = getTableSum('#bodyVales .dyn-val', true, false, true);
   
   document.getElementById('totalNotasSum').innerText = totalNotas.toFixed(2) + '€';
   document.getElementById('totalMoedasSum').innerText = totalMoedas.toFixed(2) + '€';

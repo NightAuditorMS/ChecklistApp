@@ -206,9 +206,27 @@ input[type="checkbox"] { transform:scale(1.2); margin-top:3px; cursor:pointer; }
 .cash-table .row-total { text-align: right; color: var(--gold); font-weight: bold; min-width: 80px; }
 .cash-table input { margin: 0; padding: 6px; width: 80px; text-align: center; }
 .dynamic-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.dynamic-table input { width: 100%; background: transparent; border: 1px solid transparent; color: var(--text); padding: 4px; }
-.dynamic-table input:focus { border-color: var(--gold); background: #2b2b2b; }
-.dynamic-table th, .dynamic-table td { padding: 8px; border: 1px solid var(--border); }
+.dynamic-table input,
+.dynamic-table textarea {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
+  padding: 6px 8px !important;
+  margin: 0 !important;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13.5px !important;
+  vertical-align: middle;
+}
+.dynamic-table input:focus,
+.dynamic-table textarea:focus {
+  border-color: var(--gold) !important;
+  background: #2b2b2b !important;
+  outline: none;
+}
+.dynamic-table th, .dynamic-table td { padding: 6px; border: 1px solid var(--border); vertical-align: middle; }
 .total-row { font-size: 18px; font-weight: bold; color: var(--gold); text-align: right; padding: 15px; background: rgba(198,166,103,0.05); border-radius: 8px; margin-top: 10px; border: 1px solid var(--gold); }
 
 @media(max-width:720px) { 
@@ -270,25 +288,11 @@ input[type="checkbox"] { transform:scale(1.2); margin-top:3px; cursor:pointer; }
 
 /* Autoresize textarea styling */
 textarea.dyn-just {
-  width: 100%;
-  resize: none;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 6px;
-  font-family: inherit;
-  box-sizing: border-box;
-  overflow: hidden;
+  resize: none !important;
+  overflow: hidden !important;
   height: 32px;
   line-height: 1.4;
-  vertical-align: middle;
   transition: border-color 0.2s ease, background 0.2s ease;
-}
-textarea.dyn-just:focus {
-  border-color: var(--gold);
-  background: #2b2b2b;
-  outline: none;
 }
 
 /* Action button styles */
