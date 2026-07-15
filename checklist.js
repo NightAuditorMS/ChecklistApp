@@ -64,6 +64,16 @@ function switchTab(tabId) {
     showScreen(isStarted ? 2 : 1);
   }
   
+  if (tabId === 'tab-contagem') {
+    setTimeout(() => {
+      document.querySelectorAll('.dyn-just').forEach(el => {
+        if (typeof autoResizeTextArea === 'function') {
+          autoResizeTextArea(el);
+        }
+      });
+    }, 50);
+  }
+  
   if (typeof updateChecklistProgressBar === 'function') {
     updateChecklistProgressBar();
   }
